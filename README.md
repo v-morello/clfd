@@ -7,16 +7,13 @@
 
 ### Installation
 
-Clone the repository into the directory of your choice and then:
+Clone the repository into the directory of your choice, go to the root directory of clfd, and run
 
 ```bash
-cd clfd/
 make install
 ```
 
 This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs)
-
-**TODO: Upload the package on the PyPI (Python Package Index)**
 
 ### Python version
 
