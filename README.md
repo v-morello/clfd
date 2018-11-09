@@ -7,7 +7,7 @@
 
 ### Python version
 
-The core of ``clfd`` works with both python 2.7 and python 3; however it requires the python bindings of the [PSRCHIVE](http://psrchive.sourceforge.net/) to interact with psrfits archives, and on most systems these work only with python <= 2.7.
+The core of ``clfd`` works with both python 2.7 and python 3; however it requires the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) to interact with psrfits archives, and on most systems these work only with python <= 2.7.
 
 ### Installation
 
@@ -17,7 +17,7 @@ Clone the repository into the directory of your choice, go to the root directory
 make install
 ```
 
-This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and install all required dependencies. After that, run the unit tests for good measure:
+This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies. After that we can run the unit tests for good measure:
 
 ```bash
 $ make tests
