@@ -1,14 +1,14 @@
 # clfd
 
-``clfd`` stands for Clean Folded Data, and implements smart interference removal algorithms to be used on folded pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several slow pulsars that would have been otherwise missed. For a detailed explanation of how these algorithms work and a visual demonstration of what they can do on real Parkes data, see section 2.4 of the associated HTRU paper:
+``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on folded pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several slow pulsars that would have been otherwise missed. For a detailed explanation of how these algorithms work and a visual demonstration of what they can do on real Parkes data, see section 2.4 of the associated HTRU paper:
+
 ["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/ABCD.1234)
 
 **TODO: Update the link above once the paper is on arXiv.**
 
 ### Interfaces to existing data formats
 
-The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented.
-Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/), which are not a strict dependency but warmly recommended anyway. An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives will be added if there are any expressions of interest.
+The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented. Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/), which are not a strict dependency but warmly recommended anyway. An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives will be added if there are any expressions of interest.
 
 ### Python version
 
@@ -47,11 +47,13 @@ cd apps/
 python cleanup.py -h
 ```
 
-In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar. Most of the time it is a good idea to use it though.
+In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory using 8 processes in parallel. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar. Most of the time it is a good idea to use it though.
 
 ```bash
-python cleanup.py ~/folded_data/*.ar --format psrchive --features std ptp lfamp --qmask 2.0 --despike --qspike 4.0
+python cleanup.py ~/folded_data/*.ar --fmt psrchive --features std ptp lfamp --qmask 2.0 --despike --qspike 4.0 --processes 8
 ```
+
+Every clean archive is saved in the directory where its associated input archive is found, with the an additional ``.clfd`` extension appended.
 
 ### Interactive Usage
 
