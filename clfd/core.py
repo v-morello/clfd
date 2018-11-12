@@ -284,14 +284,14 @@ def profile_mask(features, q=2.0, zap_channels=[]):
     return stats, mask
 
 
-def time_phase_mask(cube, q=2.0, zap_channels=[]):
+def time_phase_mask(cube, q=4.0, zap_channels=[]):
     """ Compute a data mask based on the cube's time-phase plot (sum of the
     data along the frequency axis of the cube).
 
     Parameters
     ----------
     cube: DataCube
-    q: float, optional (default: 2.0)
+    q: float, optional (default: 4.0)
         Parameter that controls the min and max values that define the 'inlier' or
         'normality' range. 
     zap_channels: list or array of ints, optional (default: [])

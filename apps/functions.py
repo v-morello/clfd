@@ -23,7 +23,7 @@ def load_zapfile(fname):
     return zap_channels
 
 
-def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=2.0, ext='clfd'):
+def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd'):
     # 'fpath': full-length absolute file path
     # 'fname': file name without base directory
     fpath = os.path.realpath(fpath)
@@ -63,7 +63,7 @@ def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'
 class CleanupWorker(object):
     """ Function-like object called by multiprocessing.Pool """
 
-    def __init__(self, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=2.0, ext='clfd'):
+    def __init__(self, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd'):
         self.interface = interface
         self.zap_channels = zap_channels
         self.features = features
@@ -82,7 +82,7 @@ class CleanupWorker(object):
             ext=self.ext)
 
 
-def cleanup_main(filenames, fmt='psrchive', zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=2.0, ext='clfd', processes=1):
+def cleanup_main(filenames, fmt='psrchive', zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', processes=1):
     log.debug("Files to process: {:d}".format(len(filenames)))
     log.debug("Format: {}".format(fmt))
     interface = clfd.interfaces.get_interface(fmt)

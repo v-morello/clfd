@@ -58,7 +58,7 @@ def parse_arguments():
     parser.add_argument(
         "--qspike",
         type=float,
-        default=2.0,
+        default=4.0,
         help="Tukey's rule parameter for the zero DM spike removal algorithm.",
     )
     parser.add_argument(
