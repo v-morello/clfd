@@ -1,23 +1,29 @@
 # clfd
 
-``clfd`` stands for Clean Folded Data, and implements smart RFI removal algorithms to be used on folded pulsar search and timing data. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey. The inner workings of the algorithms are described in the following paper (section 2.4):
+``clfd`` stands for Clean Folded Data, and implements smart interference removal algorithms to be used on folded pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reson for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several slow pulsars that would have been otherwise missed. For a detailed explanation of how these algorithms work and a visual demonstration of what they can do on real Parkes data, see section 2.4 of the associated HTRU paper:
 ["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/ABCD.1234)
 
 **TODO: Update the link above once the paper is on arXiv.**
 
+### Interfaces to existing data formats
+
+The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented.
+Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/), which are not a strict dependency but warmly recommended anyway. An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives will be added if there are any expressions of interest.
+
 ### Python version
 
-The core of ``clfd`` works with both python 2.7 and python 3; however it requires the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) to interact with psrfits archives, and on most systems these work only with python <= 2.7.
+The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but note that the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) work only with python <= 2.7 on most systems. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
 
 ### Installation
 
-Clone the repository into the directory of your choice, go to the root directory of clfd, and run
+Clone the repository into the directory of your choice, and run
 
 ```bash
+cd clfd
 make install
 ```
 
-This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies. After that we can run the unit tests for good measure:
+This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies with ``pip``. After that we can run the unit tests for good measure:
 
 ```bash
 $ make tests
@@ -29,17 +35,7 @@ Ran 12 tests in 0.645s
 OK
 ```
 
-Note that if the PSRCHIVE python bindings cannot be imported, then all PSRCHIVE-related tests will be skipped and you will get something like:
-
-```bash
-$ make tests
-python -m unittest discover tests
-...s.....sss
-----------------------------------------------------------------------
-Ran 12 tests in 0.058s
-
-OK (skipped=4)
-```
+Note that if the PSRCHIVE python bindings cannot be imported for any reason then all PSRCHIVE-related tests will be skipped, which will visible in the output above.
 
 
 ### Command line usage
