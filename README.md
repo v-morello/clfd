@@ -51,12 +51,7 @@ cd apps/
 python cleanup.py -h
 ```
 
-In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory. The profile
-masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0.
-``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``,
-2.0 by default, 4.0 in the example here). The spike removal is turned off by default as there is a small
-chance that it could affect pulses from a very bright low-DM pulsar. In the vast majority of cases it is
-a good idea to use it though.
+In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar. Most of the time it is a good idea to use it though.
 
 ```bash
 python cleanup.py ~/folded_data/*.ar --format psrchive --features std ptp lfamp --qmask 2.0 --despike --qspike 4.0
@@ -71,8 +66,7 @@ The ``cleanup.py`` script may be the most practical way of getting the job done,
 >>> import clfd
 
 # Load folded archive produced with PSRCHIVE
->>> archive = psrchive.Archive_load("archive.ar")
->>> cube = clfd.DataCube.from_psrchive(archive)
+>>> cube = clfd.DataCube.from_psrchive("archive.ar")
 
 # Compute chosen profile features.
 # The output is a pandas DataFrame with feature names as columns, and (subint, channel) tuples as rows.
@@ -125,21 +119,21 @@ array([[ True,  True,  True, ..., False, False, False],
 
 # Applying the mask to the original archive and saving the output is a format-dependent operation. 
 # For each format there is a corresponding Handler class in the clfd.handlers sub-module, which implements methods to apply a mask to the original file and save the output.
->>> from clfd.handlers import PsrchiveHandler
+>>> from clfd.interfaces import PsrchiveInterface
 
 # In PSRCHIVE, every profile has a weight parameter. This sets the weight of every bad profile to 0.
 # We can then save the clean data as a new archive in PSRFITS format.
->>> PsrchiveHandler.apply_profile_mask(mask, archive)
->>> PsrchiveHandler.save("archive_clean.ar", archive)
+>>> PsrchiveInterface.apply_profile_mask(mask, archive)
+>>> PsrchiveInterface.save("archive_clean.ar", archive)
 
 # Optionally, we can then use the zero DM spike removal algorithm. Here the idea is to look for
 # outliers in the zero DM time-phase plot, and replace them by appropriate values (inferred 
 # from the data) across the frequency dimension.
->>> tpmask, valid_chans, repvals = clfd.time_phase_mask(cube, q=2.0, zap_channels=zap_channels)
+>>> tpmask, valid_chans, repvals = clfd.time_phase_mask(cube, q=4.0, zap_channels=zap_channels)
 
 # 'mask' is a boolean array of shape (num_subints, num_phase_bins), whose value is True for bad time-phase bins.
 # 'valid_chans' is the list of channels NOT included in zap_channels
 # 'repvals' is a numpy array with the same shape as the data cube, containing appropriate replacement values
->>> PsrchiveHandler.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
->>> PsrchiveHandler.save("archive_cleanest.ar", archive)
+>>> PsrchiveInterface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
+>>> PsrchiveInterface.save("archive_cleanest.ar", archive)
 ```
