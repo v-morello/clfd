@@ -29,7 +29,7 @@ Ran 12 tests in 0.645s
 OK
 ```
 
-Note that if the PSRCHIVE python bindings are not installed, then all PSRCHIVE-related tests will be skipped and you will get something like:
+Note that if the PSRCHIVE python bindings cannot be imported, then all PSRCHIVE-related tests will be skipped and you will get something like:
 
 ```bash
 $ make tests
