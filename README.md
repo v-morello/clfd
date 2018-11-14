@@ -1,10 +1,15 @@
 # clfd
+------
 
-``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on folded pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several slow pulsars that would have been otherwise missed. For a detailed explanation of how these algorithms work and a visual demonstration of what they can do on real Parkes data, see section 2.4 of the associated HTRU paper:
+``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed. 
 
-["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/ABCD.1234)
+### Citation
 
-**TODO: Update the link above once the paper is on arXiv.**
+If using ```clfd``` contributes to a project that leads to a scientific publication, please cite the article
+
+["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/1811.04929)
+
+A detailed explanation of ```clfd```'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4.
 
 ### Interfaces to existing data formats
 
