@@ -29,11 +29,11 @@ class TestPsrchiveProcessing(unittest.TestCase):
         PsrchiveInterface.save(fname, archive)
 
         archive2, cube2 = PsrchiveInterface.load(fname)
-        
+
         # In PSRFITS the data are stored as 16-bit integers
         # with a separate offset and scale parameter for each profile
         # Hence the higher than default tolerance
-        self.assertTrue(numpy.allclose(cube.data, cube2.data, atol=3e-6))
+        self.assertTrue(numpy.allclose(cube.orig_data, cube2.orig_data, atol=1e-6))
         os.remove(fname)
 
     @unittest.skipUnless(HAS_PSRCHIVE, "")

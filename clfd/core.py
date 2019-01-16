@@ -34,13 +34,17 @@ class DataCube(object):
 
         self._data = data
         self._baselines = None
-        self._subtract_baseline()
+        self._scale = 1.0
+        self._offset_and_scale()
 
-    def _subtract_baseline(self):
-        """ Subtract from every profile its median value. """
+    def _offset_and_scale(self):
+        """ Subtract from every profile its median value, then scale by a 
+        constant factor to avoid float32 saturation """
         nsubs, nchans, nbins = self.data.shape
         self._baselines = np.median(self.data, axis=2)
         self._data -= self._baselines.reshape(nsubs, nchans, 1)
+        self._scale = np.median(abs(self._data))
+        self._data /= self._scale
 
     @property
     def data(self):
@@ -53,10 +57,15 @@ class DataCube(object):
         return self._baselines
 
     @property
+    def scale(self):
+        """ Scale factor for the data, to avoid float32 saturation. """
+        return self._scale
+
+    @property
     def orig_data(self):
         """ Original data, without baselines subtracted. """
         nsubs, nchans, nbins = self.data.shape
-        return self._data + self._baselines.reshape(nsubs, nchans, 1)
+        return self.data * self.scale + self.baselines.reshape(nsubs, nchans, 1)
 
     @property
     def num_subints(self):
@@ -328,6 +337,6 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
 
     nsubs, nchans, nbins = cube.data.shape
     # NOTE: Don't forget to offset replacement values by profile baselines
-    repvals = stats.loc["med"].values / num_valid_chans + cube.baselines.reshape(nsubs, nchans, 1)
+    repvals = stats.loc["med"].values / num_valid_chans * cube.scale + cube.baselines.reshape(nsubs, nchans, 1)
     return mask, valid_chans, repvals
 
