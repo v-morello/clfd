@@ -14,7 +14,7 @@ class DataCube(object):
     """ Wrapper for three-dimensional folded data. The data order is
     (time, freq, phase) """
 
-    def __init__(self, data):
+    def __init__(self, data, copy=False):
         """ Create DataCube instance from numpy array. 
         Classmethods are the preferred way of making a new DataCube instance. 
 
@@ -22,6 +22,8 @@ class DataCube(object):
         ----------
         data: ndarray
             The folded data as a 3-dimensional array, in (time, freq, phase) order.
+        copy: bool, optional
+            If True, copy the input data. Otherwise the Da (default: False)
         """
         if not type(data) == np.ndarray:
             raise ValueError("data must be a numpy array")
@@ -32,7 +34,11 @@ class DataCube(object):
         if not data.shape[2] >= 2:
             raise ValueError("data must have at least 2 phase bins")
 
-        self._data = data
+        if copy:
+            self._data = data.copy()
+        else:
+            self._data = data
+
         self._baselines = None
         self._scale = 1.0
         self._offset_and_scale()
@@ -277,8 +283,8 @@ def profile_mask(features, q=2.0, zap_channels=[]):
         X = features
 
     # Statistics for each feature, excluding zapped channels
-    stats = X.quantile([0.25, 0.75])
-    stats = stats.rename({0.25: "q1", 0.75: "q3"})
+    stats = X.quantile([0.25, 0.50, 0.75])
+    stats = stats.rename({0.25: "q1", 0.50: "med", 0.75: "q3"})
     stats.loc["iqr"] = stats.loc["q3"] - stats.loc["q1"]
     stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
     stats.loc["vmax"] = stats.loc["q3"] + q * stats.loc["iqr"]

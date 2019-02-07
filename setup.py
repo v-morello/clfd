@@ -1,6 +1,17 @@
+import os
 import setuptools
 from setuptools import setup
 
+def parse_version():
+    thisdir = os.path.dirname(__file__)
+    version_file = os.path.join(thisdir, 'clfd', '_version.py')
+    with open(version_file, 'r') as fobj:
+        text = fobj.read()
+    items = {}
+    exec(text, None, items)
+    return items['__version__']
+
+version = parse_version()
 
 setup(
     name='clfd-pulsar',
@@ -8,8 +19,8 @@ setup(
     author='Vincent Morello',
     author_email='vmorello@gmail.com',
     description='Smart RFI removal algorithms to be used on folded pulsar search and timing data',
-    version='0.1.1',
+    version=version,
     packages=setuptools.find_packages(),
-    install_requires=['numpy','pandas'],
+    install_requires=['numpy', 'pandas'],
     license='MIT License',
 )

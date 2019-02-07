@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 PKG = clfd-pulsar
-TESTS_DIR = tests
+PKG_DIR = clfd
+TESTS_DIR = ${PKG_DIR}/tests
 
 # NOTE: -e installs in "Development Mode"
 # See: https://packaging.python.org/tutorials/installing-packages/

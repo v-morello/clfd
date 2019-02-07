@@ -23,15 +23,14 @@ def load_zapfile(fname):
     return zap_channels
 
 
-def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd'):
+def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
     # 'fpath': full-length absolute file path
     # 'fname': file name without base directory
     fpath = os.path.realpath(fpath)
     __, fname = os.path.split(fpath)
+    basename, extension = os.path.splitext(fpath)
 
     log.debug("Processing: {:s}".format(fpath))
-
-    __, extension = os.path.splitext(fpath)
     archive, cube = interface.load(fpath)
 
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
@@ -53,17 +52,30 @@ def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'
         msg = "{:s} time-phase bins masked: {:d} / {:d} ({:.1%})".format(
             fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size))
         log.debug(msg)
+    else:
+        # NOTE: we set those values to None to be passed as parameters to
+        # the output Report
+        tpmask = None
+        qspike = None
 
     # Save output
     outpath = "{}.{}".format(fpath, ext)
     interface.save(outpath, archive)
     log.debug("Saved output archive: {:s}".format(outpath))
 
+    # Save report
+    if report:
+        report_path = "{}_clfd_report.h5".format(basename)
+        frequencies = interface.get_frequencies(archive)
+        report = clfd.Report(features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike)
+        report.save(report_path)
+        log.debug("Saved report file: {:s}".format(report_path))
+
 
 class CleanupWorker(object):
     """ Function-like object called by multiprocessing.Pool """
 
-    def __init__(self, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd'):
+    def __init__(self, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
         self.interface = interface
         self.zap_channels = zap_channels
         self.features = features
@@ -71,6 +83,7 @@ class CleanupWorker(object):
         self.despike = despike
         self.qspike = qspike
         self.ext = ext
+        self.report = report
 
     def __call__(self, fname):
         cleanup_file(
@@ -79,17 +92,18 @@ class CleanupWorker(object):
             qmask=self.qmask,
             despike=self.despike,
             qspike=self.qspike,
-            ext=self.ext)
+            ext=self.ext,
+            report=self.report)
 
 
-def cleanup_main(filenames, fmt='psrchive', zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', processes=1):
+def cleanup_main(filenames, fmt='psrchive', zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True, processes=1):
     log.debug("Files to process: {:d}".format(len(filenames)))
     log.debug("Format: {}".format(fmt))
     interface = clfd.interfaces.get_interface(fmt)
     zap_channels = load_zapfile(zapfile)
 
     worker_func = CleanupWorker(interface, zap_channels, features=features,
-                                qmask=qmask, despike=despike, qspike=qspike, ext=ext)
+                                qmask=qmask, despike=despike, qspike=qspike, ext=ext, report=report)
 
     if processes > 1:
         log.debug("Using multiprocessing with {:d} processes".format(processes))

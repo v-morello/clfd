@@ -10,9 +10,12 @@ from functions import cleanup_main
 
 log = logging.getLogger("clfd")
 
+help_formatter = lambda prog: argparse.ArgumentDefaultsHelpFormatter(prog, max_help_position=16)
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+        formatter_class=help_formatter, #argparse.ArgumentDefaultsHelpFormatter,
+        description="Apply smart RFI cleaning algorithms to folded data archives."
     )
     parser.add_argument(
         "--fmt",
@@ -53,7 +56,9 @@ def parse_arguments():
         and replace them by appropriate values (inferred from the data itself) across the frequency dimension. \
         Note that any channels specified by the optional zapfile are excluded from the analysis \
         and left untouched. \
-        WARNING: may negatively affect very bright individual pulses from a low-DM pulsar.",
+        WARNING: may negatively affect very bright individual pulses from a low-DM pulsar. Can also fail \
+        in particularly bad RFI environments. In doubt, avoid using this option and if you do, check the \
+        output carefully.",
     )
     parser.add_argument(
         "--qspike",
@@ -66,7 +71,7 @@ def parse_arguments():
         "--ext",
         type=str,
         default="clfd",
-        help="Extension given to the clean output files.",
+        help="Additional extension given to the clean output files.",
     )
     parser.add_argument(
         "-p",
@@ -75,17 +80,29 @@ def parse_arguments():
         default=1,
         help="Number of parallel processes to be used.",
     )
+    parser.add_argument(
+        "--no-report",
+        action="store_true",
+        default=False,
+        help="If specified, do NOT save HDF5 cleanup report(s). If the \
+        pytables python module is not installed, you will have to use this option.",
+    )
     parser.add_argument("filenames", type=str, nargs="+", help="Input file(s)")
     args = parser.parse_args()
     return args
 
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG, format="[%(levelname)s - %(asctime)s] %(message)s")
+    logging.basicConfig(level=logging.DEBUG, format="[%(levelname)5s - %(asctime)s] %(message)s")
 
     args = parse_arguments()
     log.debug("Called with arguments: {!s}".format(vars(args)))
 
+    # Format keyword arguments properly for the cleanup_main() function
     kw = dict(vars(args))
     kw.pop('filenames')
+
+    kw.pop('no_report')
+    kw['report'] = not args.no_report
     cleanup_main(args.filenames, **kw)
     

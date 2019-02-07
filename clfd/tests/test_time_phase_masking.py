@@ -62,8 +62,5 @@ class TestTimePhaseMask(unittest.TestCase):
         # Check that no bin is flagged in both masks
         self.assertFalse(numpy.any(newmask & mask))
 
-
-
-
 if __name__ == "__main__":
     unittest.main()

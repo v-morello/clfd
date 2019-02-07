@@ -10,6 +10,11 @@ except:
 class Interface(object):
     """ Base class for an interface to some file format. """
     @staticmethod
+    def get_frequencies(archive):
+        """ Return channel frequencies in MHz, as a numpy array"""
+        raise NotImplementedError
+
+    @staticmethod
     def apply_profile_mask(mask, archive):
         raise NotImplementedError
 
@@ -66,6 +71,10 @@ class PsrchiveInterface(Interface):
             for ichan in valid_chans:
                 amps = archive.get_Profile(isub, ipol, ichan).get_amps()
                 amps[bad_bins] = repvals[isub, ichan, bad_bins]
+
+    @staticmethod
+    def get_frequencies(archive):
+        return archive.get_frequencies()
 
     @staticmethod
     def load(fname):

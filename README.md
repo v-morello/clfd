@@ -4,11 +4,11 @@
 
 ### Citation
 
-If using ```clfd``` contributes to a project that leads to a scientific publication, please cite the article
+If using ``clfd`` contributes to a project that leads to a scientific publication, please cite the article
 
 ["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/1811.04929)
 
-A detailed explanation of ```clfd```'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4.
+A detailed explanation of ``clfd``'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4.
 
 ### Interfaces to existing data formats
 
@@ -17,6 +17,18 @@ The implementation of the cleaning algorithms is entirely decoupled from the inp
 ### Python version
 
 The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but note that the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) work only with python <= 2.7 on most systems. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
+
+
+### Dependencies
+
+Strict dependencies:
+
+- ``numpy``
+- ``pandas``
+
+Optional but recommended:
+
+- ``pytables``: to save and load cleaning reports in HDF5 format
 
 ### Installation
 
@@ -27,20 +39,19 @@ cd clfd
 make install
 ```
 
-This simply runs ```pip install``` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies with ``pip``. After that we can run the unit tests for good measure:
+This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies with ``pip``. If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters), then you can simply add the root directory of ``clfd`` to your ``PYTHONPATH`` environment variable. After that we can run the unit tests for good measure:
 
 ```bash
 $ make tests
-python -m unittest discover tests
-............
+python -m unittest discover clfd/tests
+..............
 ----------------------------------------------------------------------
-Ran 12 tests in 0.645s
+Ran 14 tests in 0.214s
 
 OK
 ```
 
-Note that if the PSRCHIVE python bindings cannot be imported for any reason then all PSRCHIVE-related tests will be skipped, which will visible in the output above.
-
+Note that if the PSRCHIVE python bindings cannot be imported, then all PSRCHIVE-related tests will be skipped, which will visible in the output above. Tests related to saving / loading reports will also be skipped if ``pytables`` is not available.
 
 ### Command line usage
 
@@ -51,13 +62,21 @@ cd apps/
 python cleanup.py -h
 ```
 
-In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory using 8 processes in parallel. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar. Most of the time it is a good idea to use it though.
+In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory using 8 processes in parallel. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar, and it also tends to fail in the worst RFI environments.
 
 ```bash
 python cleanup.py ~/folded_data/*.ar --fmt psrchive --features std ptp lfamp --qmask 2.0 --despike --qspike 4.0 --processes 8
 ```
 
-Every clean archive is saved in the directory where its associated input archive is found, with the an additional ``.clfd`` extension appended.
+Every clean archive is saved in the directory where its associated input archive is found, with the an additional ``.clfd`` extension appended. Report files in HDF5 format are also saved as ``BASENAME_clfd_report.h5`` where ``BASENAME`` is the archive file name without its extension. A Report stores all inputs and outputs of a clfd run on an archive, they can easily be loaded and manipulated interactively in IPython:
+
+```python
+>>> from clfd import Report
+>>> r = Report.load("SomeArchive_clfd_report.h5")
+```
+
+See section "Working with reports" below for more details.
+
 
 ### Interactive Usage
 
@@ -138,4 +157,33 @@ array([[ True,  True,  True, ..., False, False, False],
 # 'repvals' is a numpy array with the same shape as the data cube, containing appropriate replacement values
 >>> PsrchiveInterface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
 >>> PsrchiveInterface.save("archive_cleanest.ar", archive)
+```
+
+### Working with reports
+
+Running the ``cleanup.py`` script produces report files by default with some useful informations about the cleaning performed. Reports store all inputs and outputs of a clfd run on an archive. **NOTE: Reports are very much a feature in development and may change in the future**. At the moment (``v0.2.0`` and above), a Report object has the following attributes:
+
+- ``frequencies``: channel frequencies in MHz
+- ``feature_names``: list of feature names used
+- ``features``: pandas.DataFrame returned by the ``featurize()`` function
+- ``stats``: pandas.DataFrame returned by the ``featurize()`` function
+- ``profmask``: boolean profile mask returned by the ``profile_mask()`` function. This is a numpy array with shape (num_subints, num_channels)
+- ``qmask``: value of the Tukey parameter ``q`` passed to ``profile_mask()``
+- ``zap_channels``: zap_channels argument that passed to ``profile_mask()``
+- ``tpmask``: mask returned by ``time_phase_mask()`` if the function was called (i.e. when the cleanup executable is called with the ``--despike`` option). If time_phase_mask() was NOT called, tpmask will be ``None``. Otherwise, ``tpmask`` is a numpy array with shape (num_subints, num_phase_bins).
+- ``qspike``: value of the Tukey parameter 'q' passed to ``time_phase_mask()``. If ``time_phase_mask()`` was NOT called, tpmask will be ``None``.
+- ``version``: version of clfd that was used to produce this report.
+
+More attributes may be added in future versions, along with convenience methods to generate plots. In the meantime, you can generate plots yourself using ``matplotlib``, for example:
+
+```python
+>>> import matplotlib.pyplot as plt
+>>> from clfd import Report
+>>> r = Report.load("SomeArchive_clfd_report.h5")
+
+# Masked profiles appear as black pixels
+>>> plt.imshow(r.profmask, cmap='greys')
+>>> plt.title('Profile Mask')
+>>> plt.xlabel('Channel Index')
+>>> plt.ylabel('Sub-Integration Index')
 ```
