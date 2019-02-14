@@ -1,3 +1,4 @@
+import sys
 import argparse
 import logging
 import json
@@ -15,7 +16,8 @@ help_formatter = lambda prog: argparse.ArgumentDefaultsHelpFormatter(prog, max_h
 def parse_arguments():
     parser = argparse.ArgumentParser(
         formatter_class=help_formatter, #argparse.ArgumentDefaultsHelpFormatter,
-        description="Apply smart RFI cleaning algorithms to folded data archives."
+        description="Apply smart RFI cleaning algorithms to folded data archives. \
+        Version: {}".format(clfd.__version__)
     )
     parser.add_argument(
         "--fmt",
@@ -86,6 +88,12 @@ def parse_arguments():
         default=False,
         help="If specified, do NOT save HDF5 cleanup report(s). If the \
         pytables python module is not installed, you will have to use this option.",
+    )
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=clfd.__version__,
+        help="Print version number and exit",
     )
     parser.add_argument("filenames", type=str, nargs="+", help="Input file(s)")
     args = parser.parse_args()

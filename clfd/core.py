@@ -23,7 +23,8 @@ class DataCube(object):
         data: ndarray
             The folded data as a 3-dimensional array, in (time, freq, phase) order.
         copy: bool, optional
-            If True, copy the input data. Otherwise the Da (default: False)
+            If True, copy the input data. Otherwise the DataCube stores only a
+            reference to 'data' to save memory (default: False)
         """
         if not type(data) == np.ndarray:
             raise ValueError("data must be a numpy array")
@@ -44,12 +45,26 @@ class DataCube(object):
         self._offset_and_scale()
 
     def _offset_and_scale(self):
-        """ Subtract from every profile its median value, then scale by a 
-        constant factor to avoid float32 saturation """
+        """ Subtract from every profile its median value, then divide all the 
+        data by a well chosen constant factor to avoid float32 saturation """
         nsubs, nchans, nbins = self.data.shape
         self._baselines = np.median(self.data, axis=2)
         self._data -= self._baselines.reshape(nsubs, nchans, 1)
-        self._scale = np.median(abs(self._data))
+
+        # We need to divide the data by a reasonable constant factor, but:
+        # 1. The median absolute deviation (MAD) will be equal to zero in some
+        #    cases, where more than 50% of the data is equal to zero 
+        #    (happens with GMRT data)
+        # 2. The mean absolute deviation can work, but if there are any NaNs
+        #    or infs haging around, this will fail. Also, the mean abs
+        #    deviation can be dominated by outliers
+        # Therefore, we choose the MAD of the non-zero data
+        data_abs = abs(self._data)
+        mask = data_abs > 0
+        self._scale = np.median(data_abs[mask])
+        del data_abs # Save RAM as much as possible
+        if self._scale == 0:
+            raise ValueError("data appears to be uniformly zero")
         self._data /= self._scale
 
     @property

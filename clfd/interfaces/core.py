@@ -74,7 +74,24 @@ class PsrchiveInterface(Interface):
 
     @staticmethod
     def get_frequencies(archive):
-        return archive.get_frequencies()
+        """ Return channel frequencies as a numpy array """
+        # NOTE 14/02/2019: a recent (end of 2018 ?) psrchive version has a
+        # get_frequencies() method to get the list of all channel freqs.
+        # However, older ones don't, such as the 19/03/2018 version. Can't
+        # find a trace of get_frequencies() in the docs anyway:
+        # http://psrchive.sourceforge.net/classes/psrchive/classPulsar_1_1Archive.shtml
+        
+        n = archive.get_nchan()
+        # bw can be negative, which means that the first channel is the one
+        # with the top frequency 
+        bw = archive.get_bandwidth()
+        cw = bw / n
+        fc = archive.get_centre_frequency()
+
+        # Centre frequencies of first and last channel
+        fch1 = fc - (bw - cw) / 2.0
+        fchn = fc + (bw - cw) / 2.0
+        return np.linspace(fch1, fchn, n)
 
     @staticmethod
     def load(fname):

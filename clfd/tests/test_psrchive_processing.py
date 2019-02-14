@@ -19,6 +19,19 @@ class TestPsrchiveProcessing(unittest.TestCase):
     """ Test PSRCHIVE interface. """
     def setUp(self):
         self.psrchive_data_fname = os.path.join(get_example_data_path(), "psrchive_example.ar")
+        self.nchan = 128
+        # frequency offset (i.e. channel width), negative because the first 
+        # channel has the highest frequency
+        self.foff = -3.125
+        self.fch1 = 1580.43701172
+        self.frequencies = self.fch1 + self.foff * numpy.arange(self.nchan)
+
+    @unittest.skipUnless(HAS_PSRCHIVE, "")
+    def test_get_frequencies(self):
+        """ Check that the get_frequencies() method works as expected """
+        archive, cube = PsrchiveInterface.load(self.psrchive_data_fname)
+        freqs = PsrchiveInterface.get_frequencies(archive)
+        self.assertTrue(numpy.allclose(freqs, self.frequencies))
 
     @unittest.skipUnless(HAS_PSRCHIVE, "")
     def test_load_save_psrchive(self):

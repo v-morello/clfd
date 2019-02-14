@@ -182,7 +182,7 @@ More attributes may be added in future versions, along with convenience methods 
 >>> r = Report.load("SomeArchive_clfd_report.h5")
 
 # Masked profiles appear as black pixels
->>> plt.imshow(r.profmask, cmap='greys')
+>>> plt.imshow(r.profmask, cmap='Greys')
 >>> plt.title('Profile Mask')
 >>> plt.xlabel('Channel Index')
 >>> plt.ylabel('Sub-Integration Index')
