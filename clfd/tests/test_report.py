@@ -12,6 +12,14 @@ try:
 except ImportError:
     HAS_PYTABLES = False
 
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    HAS_MATPLOTLIB = True
+except:
+    HAS_MATPLOTLIB = False
+
+
 class TestReport(unittest.TestCase):
     """ Check the Report class """
     def setUp(self):
@@ -54,6 +62,19 @@ class TestReport(unittest.TestCase):
         self.assertTrue(numpy.array_equal(self.profmask, r.profmask))
         self.assertEqual(clfd.__version__, r.version)
 
+    @unittest.skipUnless(HAS_MATPLOTLIB, "")
+    def test_save_corner_plot(self):
+        report = self.get_report()
+        with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as fobj:
+            fname = fobj.name
+            report.corner_plot(to_file=fname)
+
+    @unittest.skipUnless(HAS_MATPLOTLIB, "")
+    def test_save_profile_mask_plot(self):
+        report = self.get_report()
+        with tempfile.NamedTemporaryFile(mode="wb", suffix='.png', delete=False) as fobj:
+            fname = fobj.name
+            report.profile_mask_plot(to_file=fname)
 
 
 if __name__ == "__main__":

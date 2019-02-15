@@ -9,21 +9,12 @@ try:
 except:
     HAS_PYTABLES = False
 
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except:
-    HAS_MATPLOTLIB = False
+from report_plots import profile_mask_plot, CornerPlot
 
 
 def _check_hdf5_libs():
     if not HAS_PYTABLES:
         raise ImportError("pytables library not available, cannot save/load Reports")
-
-
-def _check_matplotlib():
-    if not HAS_MATPLOTLIB:
-        raise ImportError("matplotlib library not available")
 
 
 class Report(object):
@@ -69,11 +60,25 @@ class Report(object):
         self._zap_channels = np.asarray(zap_channels, dtype=int)
         self._tpmask = tpmask
         self._qspike = qspike
+
+        # Can be overriden by load() method
         self._version = __version__
+
+        # Can be set by load() method
+        self._fname = None
 
     def _set_version(self, version):
         """ Private method to override current version when loading an old Report from file """
         self._version = version
+
+    def _set_fname(self, fname):
+        """ Private method to set file name when loading a Report from a file"""
+        self._fname = fname
+
+    @property
+    def fname(self):
+        """ File name the report was loaded from, otherwise None"""
+        return self._fname
 
     @property
     def frequencies(self):
@@ -131,12 +136,59 @@ class Report(object):
         """ Version of clfd that was used to produce this Report """
         return self._version
 
-    def scatter_plot(self):
-        """ NOT IMPLEMENTED YET """
-        _check_matplotlib()
-        # TODO
+    def profile_mask_plot(self, to_file=None, **kwargs):
+        """ Plot the profile mask along with the fraction of channels and 
+        sub-integrations that wre masked. 
+        
+        Parameters
+        ----------
+        to_file: str, optional
+            If specified, save plot to given file name or path.
+        figsize: tuple, optional
+            Figure size (height, width)
+        dpi: float, optional
+            Figure dpi
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The Figure object produced
+        """
+        fig = profile_mask_plot(self, **kwargs)
+        if to_file is None:
+            fig.show()
+        else:
+            fig.savefig(to_file)
+        return fig
+
+    def corner_plot(self, to_file=None, **kwargs):
+        """ Make a corner plot of all the features, i.e. pairwise scatter
+        plots and histograms of individual features.
+
+        Parameters
+        ----------
+        to_file: str, optional
+            If specified, save plot to given file name or path.
+        figsize: tuple, optional
+            Figure size (height, width)
+        dpi: float, optional
+            Figure dpi
+
+        Returns
+        -------
+        fig: matplotlib.Figure
+            The Figure object produced
+        """
+        fig = CornerPlot(self).plot(**kwargs)
+        if to_file is None:
+            fig.show()
+        else:
+            fig.savefig(to_file)
+        return fig
+
+    def before_after_plot(self, to_file=None, **kwargs):
         raise NotImplementedError
-    
+
     def save(self, fname):
         """ Save Report to HDF5 file """
         _check_hdf5_libs()
@@ -205,4 +257,7 @@ class Report(object):
         report = cls(features, stats, profmask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike)
         # NOTE: don't forget to override version to the one read from file
         report._set_version(version)
+
+        # Also set file name attribute
+        report._set_fname(fname)
         return report

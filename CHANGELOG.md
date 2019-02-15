@@ -1,6 +1,15 @@
 # Changelog
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 0.2.2a1 - In Preparation
+### Added
+- Added two methods to ``Report`` class to generate plots: ``corner_plot()`` and ``profile_mask_plot()``. The corner plot shows pairwise scatter plots of profile features and individual histograms, and the other shows the 2D profile mask along with the fraction of data masked in each channel and sub-integration.
+
+### TODO
+- Add ``TODO.md`` with a list of planned features/upgrades/fixes.
+- Stop scaling the data on loading, but use float64 accumulators when computing features instead. This is a simpler way to avoid saturation issues.
+- Update README.
+
 ## 0.2.1 - 2019-02-15
 ### Fixed
 - DataCubes are now divided by the median absolute deviation (MAD) of non-zero values only. This avoids problems with archives where more than 50% of the data are equal to zero (may happen on GMRT data for example).
