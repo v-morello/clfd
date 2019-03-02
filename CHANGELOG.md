@@ -3,12 +3,8 @@ All notable changes will be documented in this file. The format is based on [Kee
 
 ## 0.2.2a1 - In Preparation
 ### Added
-- Added two methods to ``Report`` class to generate plots: ``corner_plot()`` and ``profile_mask_plot()``. The corner plot shows pairwise scatter plots of profile features and individual histograms, and the other shows the 2D profile mask along with the fraction of data masked in each channel and sub-integration.
-
-### TODO
-- Add ``TODO.md`` with a list of planned features/upgrades/fixes.
-- Stop scaling the data on loading, but use float64 accumulators when computing features instead. This is a simpler way to avoid saturation issues.
-- Update README.
+- ``Report`` now has two method to generate nice plots: ``corner_plot()`` and ``profile_mask_plot()``. The corner plot shows pairwise scatter plots of profile features and individual histograms, and the other shows the 2D profile mask along with the fraction of data masked in each channel and sub-integration.
+- ``TODO.md`` with a list of planned features/upgrades/fixes.
 
 ## 0.2.1 - 2019-02-15
 ### Fixed
