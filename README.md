@@ -4,11 +4,14 @@
 
 ### Citation
 
-If using ``clfd`` contributes to a project that leads to a scientific publication, please cite the article
-
+If using ``clfd`` contributes to a project that leads to a scientific publication, please cite the article  
 ["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/1811.04929)
 
-A detailed explanation of ``clfd``'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4.
+A detailed explanation of ``clfd``'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4. The idea is to convert each profile (there is one profile per channel and per sub-integration) to a small set of representative features (e.g. standard deviation, peak-to-peak difference) and to flag outliers in the resulting feature space. Since v0.2.2, ``clfd``  outputs report plots to visualize the outlier flagging process and the resulting two-dimensional time-frequency mask applied to the clean archive. Here's the output of a ``clfd`` run on a Parkes observation of the pulsar J0735-62, where the red lines delimit the automatically inferred acceptable value range for each feature:
+
+![Corner Plot](docs/corner_plot.png)
+
+![Profile Mask](docs/profile_mask.png)
 
 ### Interfaces to existing data formats
 
@@ -21,13 +24,11 @@ The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but 
 
 ### Dependencies
 
-Strict dependencies:
-
+Strict dependencies:  
 - ``numpy``
 - ``pandas``
 
-Optional but recommended:
-
+Optional but recommended:  
 - ``pytables``: to save and load cleaning reports in HDF5 format
 
 ### Installation
@@ -161,7 +162,7 @@ array([[ True,  True,  True, ..., False, False, False],
 
 ### Working with reports
 
-Running the ``cleanup.py`` script produces report files by default with some useful informations about the cleaning performed. Reports store all inputs and outputs of a clfd run on an archive. **NOTE: Reports are very much a feature in development and may change in the future**. At the moment (``v0.2.0`` and above), a Report object has the following attributes:
+Running the ``cleanup.py`` script produces report files by default with some useful informations about the cleaning performed. Reports store all inputs and outputs of a clfd run on an archive. **NOTE: Reports are very much a feature in development and may change in the future**. At the moment (``v0.2.2`` and above), a Report object has the following attributes:
 
 - ``frequencies``: channel frequencies in MHz
 - ``feature_names``: list of feature names used
@@ -174,16 +175,8 @@ Running the ``cleanup.py`` script produces report files by default with some use
 - ``qspike``: value of the Tukey parameter 'q' passed to ``time_phase_mask()``. If ``time_phase_mask()`` was NOT called, tpmask will be ``None``.
 - ``version``: version of clfd that was used to produce this report.
 
-More attributes may be added in future versions, along with convenience methods to generate plots. In the meantime, you can generate plots yourself using ``matplotlib``, for example:
+And there are two methods to generate nice plots, of which you can see examples above:
+- ``corner_plot()``: pairwise scatter plot of profile features and single feature histograms. Each point represents a single profile (there is one profile per (subint, channel) tuple), and the red lines the inlier (i.e. acceptable) value ranges for each feature. Anything outside the inlier range has been flagged as anomalous and zero-weighted in the output archive.
+- ``profile_mask_plot()``: A view of the two-dimensional profile mask, along with the fraction of data masked in each channel and each sub-integration.
 
-```python
->>> import matplotlib.pyplot as plt
->>> from clfd import Report
->>> r = Report.load("SomeArchive_clfd_report.h5")
-
-# Masked profiles appear as black pixels
->>> plt.imshow(r.profmask, cmap='Greys')
->>> plt.title('Profile Mask')
->>> plt.xlabel('Channel Index')
->>> plt.ylabel('Sub-Integration Index')
-```
+More attributes and plots will be added in future versions.
