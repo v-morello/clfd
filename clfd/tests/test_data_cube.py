@@ -48,16 +48,15 @@ class TestDataCube(unittest.TestCase):
             clfd.DataCube(self.ndarray[:1, :1, :])
 
     def test_load_save_npy(self):
-        with tempfile.NamedTemporaryFile(mode="wb", suffix='.npy', delete=False) as fobj:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix='.npy') as fobj:
             fname = fobj.name
         
-        # NOTE: leaving self.ndarray untouched
-        cube1 = clfd.DataCube(self.ndarray, copy=True)
-        cube1.save_npy(fname)
-        cube2 = clfd.DataCube.from_npy(fname)
+            # NOTE: leaving self.ndarray untouched
+            cube1 = clfd.DataCube(self.ndarray, copy=True)
+            cube1.save_npy(fname)
+            cube2 = clfd.DataCube.from_npy(fname)
 
-        self.assertTrue(numpy.allclose(cube1.data, cube2.data))
-        os.remove(fname)
+            self.assertTrue(numpy.allclose(cube1.data, cube2.data))
 
     @unittest.skipUnless(HAS_PSRCHIVE, "psrchive python bindings must be installed")
     def test_load_psrchive(self):

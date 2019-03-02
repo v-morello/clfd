@@ -6,11 +6,13 @@ def ptp(cube):
 
 def std(cube):
     """ Standard deviation """
-    return cube.data.std(axis=2)
+    # NOTE: use a float64 accumulator to avoid saturation issues
+    return cube.data.std(axis=2, dtype=np.float64)
 
 def var(cube):
     """ Variance """
-    return cube.data.var(axis=2)
+    # NOTE: use a float64 accumulator to avoid saturation issues
+    return cube.data.var(axis=2, dtype=np.float64)
 
 def lfamp(cube):
     """ Amplitude of second Fourier bin """

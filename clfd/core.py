@@ -40,53 +40,29 @@ class DataCube(object):
         else:
             self._data = data
 
-        self._baselines = None
-        self._scale = 1.0
-        self._offset_and_scale()
+        self._subtract_baseline()
 
-    def _offset_and_scale(self):
-        """ Subtract from every profile its median value, then divide all the 
-        data by a well chosen constant factor to avoid float32 saturation """
+    def _subtract_baseline(self):
+        """ Subtract from every profile its median value """
         nsubs, nchans, nbins = self.data.shape
         self._baselines = np.median(self.data, axis=2)
         self._data -= self._baselines.reshape(nsubs, nchans, 1)
 
-        # We need to divide the data by a reasonable constant factor, but:
-        # 1. The median absolute deviation (MAD) will be equal to zero in some
-        #    cases, where more than 50% of the data is equal to zero 
-        #    (happens with GMRT data)
-        # 2. The mean absolute deviation can work, but if there are any NaNs
-        #    or infs haging around, this will fail. Also, the mean abs
-        #    deviation can be dominated by outliers
-        # Therefore, we choose the MAD of the non-zero data
-        data_abs = abs(self._data)
-        mask = data_abs > 0
-        self._scale = np.median(data_abs[mask])
-        del data_abs # Save RAM as much as possible
-        if self._scale == 0:
-            raise ValueError("data appears to be uniformly zero")
-        self._data /= self._scale
-
     @property
     def data(self):
-        """ 3D data with baselines subtracted. """
+        """ 3D data """
         return self._data
-
-    @property
-    def baselines(self):
-        """ 2D array with shape (num_subints, num_chans) containing the baselines of all profiles. """
-        return self._baselines
-
-    @property
-    def scale(self):
-        """ Scale factor for the data, to avoid float32 saturation. """
-        return self._scale
 
     @property
     def orig_data(self):
         """ Original data, without baselines subtracted. """
         nsubs, nchans, nbins = self.data.shape
-        return self.data * self.scale + self.baselines.reshape(nsubs, nchans, 1)
+        return self.data + self.baselines.reshape(nsubs, nchans, 1)
+
+    @property
+    def baselines(self):
+        """ 2D array with shape (num_subints, num_chans) containing the baselines of all profiles. """
+        return self._baselines
 
     @property
     def num_subints(self):
@@ -358,6 +334,6 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
 
     nsubs, nchans, nbins = cube.data.shape
     # NOTE: Don't forget to offset replacement values by profile baselines
-    repvals = stats.loc["med"].values / num_valid_chans * cube.scale + cube.baselines.reshape(nsubs, nchans, 1)
+    repvals = stats.loc["med"].values / num_valid_chans + cube.baselines.reshape(nsubs, nchans, 1)
     return mask, valid_chans, repvals
 

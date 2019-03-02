@@ -1,10 +1,13 @@
 # Changelog
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## 0.2.2a1 - In Preparation
+## 0.2.2 - 2019-03-02
 ### Added
 - ``Report`` now has two method to generate nice plots: ``corner_plot()`` and ``profile_mask_plot()``. The corner plot shows pairwise scatter plots of profile features and individual histograms, and the other shows the 2D profile mask along with the fraction of data masked in each channel and sub-integration.
 - ``TODO.md`` with a list of planned features/upgrades/fixes.
+
+### Changed
+- Improved fix for float saturation issues: do not scale the data anymore when loading an archive into a DataCube, instead use float64 accumulators when computing profile variance and standard deviation. The ``DataCube`` property ``data`` now returns the original data with the baselines (i.e. profile median values) subtracted, while the property ``orig_data`` returns the data exactly as they are read from the archive.
 
 ## 0.2.1 - 2019-02-15
 ### Fixed
