@@ -21,6 +21,6 @@ setup(
     description='Smart RFI removal algorithms to be used on folded pulsar search and timing data',
     version=version,
     packages=setuptools.find_packages(),
-    install_requires=['numpy', 'pandas', 'pytables'],
+    install_requires=['numpy', 'pandas', 'tables'],
     license='MIT License',
 )
