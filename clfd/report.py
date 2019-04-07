@@ -9,7 +9,7 @@ try:
 except:
     HAS_PYTABLES = False
 
-from report_plots import profile_mask_plot, CornerPlot
+from clfd.report_plots import profile_mask_plot, CornerPlot
 
 
 def _check_hdf5_libs():

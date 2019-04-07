@@ -4,6 +4,7 @@ All notable changes will be documented in this file. The format is based on [Kee
 ## [Unreleased]
 ### Fixed
 - Dependency ``pytables`` in ``setup.py`` should be called ``tables`` when installed via ``pip``, apparently the same package has a different name on conda and PyPI.
+- Removed relative import in ``report_plots.py`` that raised an error when using ``clfd`` with python 3+.
 
 ## 0.2.2 - 2019-03-02
 ### Added
