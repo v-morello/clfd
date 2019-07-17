@@ -36,7 +36,7 @@ def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
 
     # Profile masking
-    features = clfd.featurize(cube)
+    features = clfd.featurize(cube, features=features)
     stats, mask = clfd.profile_mask(
         features, q=qmask, zap_channels=zap_channels)
     interface.apply_profile_mask(mask, archive)
