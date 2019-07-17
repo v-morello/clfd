@@ -120,8 +120,10 @@ class CornerPlot(object):
                 else: # scatter
                     self._scatter_plot(xname, yname)
 
-        __, fname = os.path.split(self.report.fname)
-        plt.suptitle("Corner plot: {:s}".format(fname), ha='left', x=0.39)
+        # NOTE: if Report was not loaded from a file, fname is None
+        if self.report.fname is not None:
+            __, fname = os.path.split(self.report.fname)
+            plt.suptitle("Corner plot: {:s}".format(fname), ha='left', x=0.39)
 
         plt.tight_layout()
         return fig
@@ -142,6 +144,7 @@ def profile_mask_plot(report, figsize=(12, 4), dpi=100):
     ax_mask.imshow(report.profmask, cmap='Greys', aspect='auto', origin='lower')
     ax_mask.set_ylabel("Sub-integration index")
 
+    # NOTE: if Report was not loaded from a file, fname is None
     if report.fname is not None:
         __, fname = os.path.split(report.fname)
         ax_mask.set_title("Profile mask: {}".format(fname))
