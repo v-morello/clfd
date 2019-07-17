@@ -1,10 +1,14 @@
 # Changelog
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## 0.2.3 - 2019-07-17
 ### Fixed
 - Dependency ``pytables`` in ``setup.py`` should be called ``tables`` when installed via ``pip``, apparently the same package has a different name on conda and PyPI.
 - Removed relative import in ``report_plots.py`` that raised an error when using ``clfd`` with python 3+.
+- Fixed a bug in ``cleanup.py`` where the list of features was not properly passed down to the core functions, which means that the list of features used was always the default triplet ``std, ptp, lfamp``.
+
+### Added
+- ``Report`` corner plot now displays the name of the report file.
 
 ## 0.2.2 - 2019-03-02
 ### Added

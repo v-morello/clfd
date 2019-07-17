@@ -120,6 +120,9 @@ class CornerPlot(object):
                 else: # scatter
                     self._scatter_plot(xname, yname)
 
+        __, fname = os.path.split(self.report.fname)
+        plt.suptitle("Corner plot: {:s}".format(fname), ha='left', x=0.39)
+
         plt.tight_layout()
         return fig
 
