@@ -1,0 +1,6 @@
+global-include *.py 
+global-include *.md
+include LICENSE
+include Makefile
+include clfd/example_data/*
+prune .vscode

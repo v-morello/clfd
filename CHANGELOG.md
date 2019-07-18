@@ -1,6 +1,17 @@
 # Changelog
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## 0.3.0 - 2019-07-20
+### Added
+- The latest release of `clfd` can now be easily installed via `pip install clfd`. 
+- The setup script now defines a console script entry point `clfd` which points to the main function of `cleanup.py`. From the point of view of the user, this means a script called `clfd` is automatically placed in the `PATH`, which can be called from anywhere and that simply executes `cleanup.py`. This only works if using an installation method that actually executes the setup script, i.e. it won't work when just cloning the repository and placing it in the `PYTHONPATH`, in which case an alias named `clfd` for `cleanup.py` has to be defined manually.
+
+### Changed
+- The module name in `setup.py` has been changed from `clfd-pulsar` to simply `clfd`. The original decision was made to avoid potential name collisions, but `clfd` is not currently taken anywhere so let's make things simple from now on. *To avoid any trouble when upgrading to the new version, users should first cleanly uninstall any older versions of* `clfd`, by typing `pip uninstall clfd-pulsar`.
+- Rearranged directory structure to make the module installable via `pip`. `apps`, `tests` and `example_data` are now subdirectories of `clfd`.
+- Updated installation instructions in `README`
+- Updated `README` with a word of warning on the `--despike` command line option
+
 ## 0.2.3 - 2019-07-17
 ### Fixed
 - Dependency ``pytables`` in ``setup.py`` should be called ``tables`` when installed via ``pip``, apparently the same package has a different name on conda and PyPI.

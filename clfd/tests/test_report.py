@@ -68,6 +68,7 @@ class TestReport(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="wb", suffix='.png') as fobj:
             fname = fobj.name
             report.corner_plot(to_file=fname)
+            plt.close()
 
     @unittest.skipUnless(HAS_MATPLOTLIB, "")
     def test_save_profile_mask_plot(self):
@@ -75,6 +76,7 @@ class TestReport(unittest.TestCase):
         with tempfile.NamedTemporaryFile(mode="wb", suffix='.png', delete=False) as fobj:
             fname = fobj.name
             report.profile_mask_plot(to_file=fname)
+            plt.close()
 
 
 if __name__ == "__main__":

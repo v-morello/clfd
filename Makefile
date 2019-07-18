@@ -1,13 +1,13 @@
 .DEFAULT_GOAL := help
-PKG = clfd-pulsar
+PKG = clfd
 PKG_DIR = clfd
 TESTS_DIR = ${PKG_DIR}/tests
 
 # NOTE: -e installs in "Development Mode"
 # See: https://packaging.python.org/tutorials/installing-packages/
 
-dist: ## Build source distributions
-	python setup.py sdist bdist_wheel
+dist: clean ## Build source distributions
+	python setup.py sdist
 
 install: ## Install the package
 	pip install -e .
@@ -31,7 +31,13 @@ clean: ## Remove all python cache and build files
 	find . -type d -name "__pycache__" -delete
 	rm -rf build/
 	rm -rf dist/
-	rm -rf clfd_pulsar.egg-info/
+	rm -rf clfd.egg-info/
+
+upload_test: ## Upload the distribution source to the TEST PyPI
+	twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+upload: ## Upload the distribution source to the REAL PyPI
+	twine upload dist/*
 
 tests: ## Run unit tests
 	python -m unittest discover ${TESTS_DIR}

@@ -1,8 +1,10 @@
 # clfd
 
+**NOTE:** version 0.3.0 can now be installed via `pip install`. **Existing users: please read the installation instructions below before upgrading to 0.3+**
+
 ``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed. 
 
-### Citation
+## Citation
 
 If using ``clfd`` contributes to a project that leads to a scientific publication, please cite the article  
 ["The High Time Resolution Universe survey XIV: Discovery of 23 pulsars through GPU-accelerated reprocessing"](https://arxiv.org/abs/1811.04929)
@@ -13,16 +15,16 @@ A detailed explanation of ``clfd``'s algorithms and a visual demonstration of wh
 
 ![Profile Mask](docs/profile_mask.png)
 
-### Interfaces to existing data formats
+## Interfaces to existing data formats
 
-The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented. Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/), which are not a strict dependency but warmly recommended anyway. An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives will be added if there are any expressions of interest.
+The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented. Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/). An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives can be added if there are any expressions of interest.
 
-### Python version
+## Python version
 
 The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but note that the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) work only with python <= 2.7 on most systems. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
 
 
-### Dependencies
+## Dependencies
 
 Strict dependencies:  
 - ``numpy``
@@ -30,58 +32,90 @@ Strict dependencies:
 
 Optional but recommended:  
 - ``pytables``: to save and load cleaning reports in HDF5 format
+- ``matplotlib``: to plot cleaning reports in particular
 
-### Installation
 
-Clone the repository into the directory of your choice, and run
+## Installation
 
-```bash
-cd clfd
-make install
+There are three main choices here, given in decreasing order of recommendation. 
+**Important note to EXISTING users**: the package name in `setup.py` was changed from `clfd-pulsar` to `clfd` in version 0.3.0. This has the potential to cause some trouble. **When upgrading from a version older than v0.3.0, users should first cleanly uninstall any older versions of** `clfd` by typing `pip uninstall clfd-pulsar`. Also, if you created a shell alias called `clfd` that points to `apps/cleanup.py`, please remove it, as the new setup script now automatically takes care of creating it (via a console_scripts entry point).
+
+
+#### Installing with pip
+
+The easiest method is to use pip install, which pulls the latest release from the python package index and installs all missing dependencies:
+```
+pip install clfd
 ```
 
-This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), and installs all required dependencies with ``pip``. If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters), then you can simply add the root directory of ``clfd`` to your ``PYTHONPATH`` environment variable. After that we can run the unit tests for good measure:
+Once installed, import the module and run the unit tests:
+```
+In [1]: import clfd
 
-```bash
-$ make tests
-python -m unittest discover clfd/tests
-..............
+In [2]: clfd.test()
+.................
 ----------------------------------------------------------------------
-Ran 14 tests in 0.214s
+Ran 17 tests in 1.261s
 
 OK
 ```
-
 Note that if the PSRCHIVE python bindings cannot be imported, then all PSRCHIVE-related tests will be skipped, which will visible in the output above. Tests related to saving / loading reports will also be skipped if ``pytables`` is not available.
 
-### Command line usage
 
-There is a ``cleanup.py`` script in the ``apps`` sub-directory that allows batch processing of multiple files / archives at once. For detailed help on command line arguments:
+Finally, check that the main command-line application of `clfd` has been placed in your `PATH`:
+```
+clfd -h
+```
+And you should see the full help of the application, see next section for more details.
+
+
+#### Editable installation
+
+Alternatively, you can clone the repository and in the base directory of `clfd` just type:
 
 ```bash
-cd apps/
-python cleanup.py -h
+make install
 ```
 
-In the example below, we process all psrchive folded archives in the ``~/folded_data`` directory using 8 processes in parallel. The profile masking algorithm uses the same three features as in the paper with a Tukey parameter (``qmask``) of 2.0. ``--despike`` enables the use of the zero DM spike removal algorithm, which has its own Tukey parameter (``qspike``, 4.0 in the example here). The spike removal is turned off by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar, and it also tends to fail in the worst RFI environments.
+This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), which means you can freely edit the code. It also installs all required dependencies with ``pip``.
+
+
+#### The PYTHONPATH method
+
+If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters) or like to play it old school, then you can simply clone the repository and add the base directory of ``clfd`` to your ``PYTHONPATH`` environment variable, but then:
+1. You have to install the required dependencies manually.
+2. The main command-line application `clfd` (see below) will **NOT** be placed in your `PATH` automatically, which means that you may want to create a shell alias that points to `clfd/apps/cleanup.py` to make life enjoyable.
+
+I warmly recommend using one of the methods above unless you have no other option.
+
+
+## Command line usage
+
+If your installation went well, a command-line application `clfd` should now appear in your `PATH` and be callable from anywhere. It points to the ``cleanup.py`` script in the ``apps`` sub-directory, and can batch process multiple files / archives at once. For detailed help on command line arguments:
 
 ```bash
-python cleanup.py ~/folded_data/*.ar --fmt psrchive --features std ptp lfamp --qmask 2.0 --despike --qspike 4.0 --processes 8
+clfd -h
 ```
 
-Every clean archive is saved in the directory where its associated input archive is found, with the an additional ``.clfd`` extension appended. Report files in HDF5 format are also saved as ``BASENAME_clfd_report.h5`` where ``BASENAME`` is the archive file name without its extension. A Report stores all inputs and outputs of a clfd run on an archive, they can easily be loaded and manipulated interactively in IPython:
+Running with default arguments should work very well in the vast majority of cases. For example, to process a batch of `PSRCHIVE` archive files placed in the ``~/folded_data`` directory:
+```
+clfd ~/folded_data/*.ar
+```
+This leaves the input files intact, and produces cleaned copies which are placed in the same directory, with the an additional ``.clfd`` extension appended. Report files in HDF5 format are also saved as ``BASENAME_clfd_report.h5`` where ``BASENAME`` is the archive file name without its extension. A Report stores all inputs and outputs of a clfd run on an archive, they can easily be loaded and manipulated interactively in IPython. See also section "Working with reports" below for more details.
 
 ```python
 >>> from clfd import Report
 >>> r = Report.load("SomeArchive_clfd_report.h5")
+>>> r.corner_plot()
+>>> r.profile_mask_plot()
 ```
 
-See section "Working with reports" below for more details.
+The masking of bad time-phase bins can be enabled with the `--despike` option. However, it is disabled by default as there is a small chance that it could affect pulses from a very bright low-DM pulsar, and it also tends to fail in the worst RFI environments. Be careful when using that option, and check that you are getting an improvement of data quality out of it.
 
 
-### Interactive Usage
+## Interactive Usage
 
-The ``cleanup.py`` script may be the most practical way of getting the job done, but it just calls functions that are accessible to the user as well. It might be useful to check or plot intermediate outputs. The example below exposes the computation steps: featurization, outlier flagging and application of the outlier mask to the original archive.
+The command-line application may be the most practical way of getting the job done, but it just calls functions that are accessible to the user as well. It might be useful to check or plot intermediate outputs. The example below exposes the computation steps: featurization, outlier flagging and application of the outlier mask to the original archive.
 
 ```python
 >>> import psrchive
@@ -160,9 +194,9 @@ array([[ True,  True,  True, ..., False, False, False],
 >>> PsrchiveInterface.save("archive_cleanest.ar", archive)
 ```
 
-### Working with reports
+## Working with reports
 
-Running the ``cleanup.py`` script produces report files by default with some useful informations about the cleaning performed. Reports store all inputs and outputs of a clfd run on an archive. **NOTE: Reports are very much a feature in development and may change in the future**. At the moment (``v0.2.2`` and above), a Report object has the following attributes:
+Running the main command line application produces report files with some useful information about the cleaning performed. Reports store all inputs and outputs of a clfd run on an archive. **NOTE: Reports are very much a feature in development and may change in the future**. At the moment (``v0.2.2`` and above), a Report object has the following attributes:
 
 - ``frequencies``: channel frequencies in MHz
 - ``feature_names``: list of feature names used

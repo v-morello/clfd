@@ -1,3 +1,10 @@
+#!/usr/bin/env python
+# NOTE: this is the right shebang, compatible with virtual / conda environments
+# https://stackoverflow.com/questions/6908143/should-i-put-shebang-in-python-scripts-and-what-form-should-it-take
+
+# NOTE: This script cannot be named clfd.py, because that makes any statement 
+# 'import clfd.X' fail
+
 import sys
 import argparse
 import logging
@@ -6,8 +13,7 @@ import os
 
 import clfd
 import clfd.interfaces
-
-from functions import cleanup_main
+from clfd.apps import cleanup_main
 
 log = logging.getLogger("clfd")
 
@@ -100,7 +106,7 @@ def parse_arguments():
     return args
 
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.DEBUG, format="[%(levelname)5s - %(asctime)s] %(message)s")
 
     args = parse_arguments()
@@ -113,4 +119,7 @@ if __name__ == "__main__":
     kw.pop('no_report')
     kw['report'] = not args.no_report
     cleanup_main(args.filenames, **kw)
+
     
+if __name__ == "__main__":
+    main()
