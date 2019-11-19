@@ -1,6 +1,11 @@
 # Changelog
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+
+## 0.3.1 - 2019-11-19
+### Added
+- The `clfd` command line application now has a `-o` / `--outdir` option to save all data products to a single output directory
+
 ## 0.3.0 - 2019-07-20
 ### Added
 - The latest release of `clfd` can now be easily installed via `pip install clfd`. 

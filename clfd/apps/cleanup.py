@@ -19,7 +19,16 @@ log = logging.getLogger("clfd")
 
 help_formatter = lambda prog: argparse.ArgumentDefaultsHelpFormatter(prog, max_help_position=16)
 
+
+
 def parse_arguments():
+    def outdir(path):
+        """ Function that checks the outdir argument """
+        if not os.path.isdir(path):
+            msg = "Specified output directory {!r} does not exist".format(path)
+            raise argparse.ArgumentTypeError(msg)
+        return path
+
     parser = argparse.ArgumentParser(
         formatter_class=help_formatter, #argparse.ArgumentDefaultsHelpFormatter,
         description="Apply smart RFI cleaning algorithms to folded data archives. \
@@ -31,6 +40,14 @@ def parse_arguments():
         choices=["psrchive"],
         default="psrchive",
         help="Input file format",
+    )
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        type=outdir,
+        default=None,
+        help="Output directory for the data products. If not specified (by default), the products \
+        corresponding to a given input file are written in the same directory as that file.",
     )
     parser.add_argument(
         "-z",

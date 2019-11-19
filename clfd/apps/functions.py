@@ -23,12 +23,12 @@ def load_zapfile(fname):
     return zap_channels
 
 
-def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
+def cleanup_file(fpath, interface, zap_channels, outdir=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
     # 'fpath': full-length absolute file path
     # 'fname': file name without base directory
     fpath = os.path.realpath(fpath)
-    __, fname = os.path.split(fpath)
-    basename, extension = os.path.splitext(fpath)
+    fdir, fname = os.path.split(fpath)
+    basename, extension = os.path.splitext(fname)
 
     log.debug("Processing: {:s}".format(fpath))
     archive, cube = interface.load(fpath)
@@ -59,13 +59,17 @@ def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'
         qspike = None
 
     # Save output
-    outpath = "{}.{}".format(fpath, ext)
+    if outdir is None:
+        outdir = fdir
+    outpath = "{}.{}".format(os.path.join(outdir, fname), ext)
+    
     interface.save(outpath, archive)
     log.debug("Saved output archive: {:s}".format(outpath))
 
     # Save report
     if report:
-        report_path = "{}_clfd_report.h5".format(basename)
+        report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
+
         frequencies = interface.get_frequencies(archive)
         report = clfd.Report(features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike)
         report.save(report_path)
@@ -75,9 +79,10 @@ def cleanup_file(fpath, interface, zap_channels, features=('std', 'ptp', 'lfamp'
 class CleanupWorker(object):
     """ Function-like object called by multiprocessing.Pool """
 
-    def __init__(self, interface, zap_channels, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
+    def __init__(self, interface, zap_channels, outdir=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
         self.interface = interface
         self.zap_channels = zap_channels
+        self.outdir = outdir
         self.features = features
         self.qmask = qmask
         self.despike = despike
@@ -88,6 +93,7 @@ class CleanupWorker(object):
     def __call__(self, fname):
         cleanup_file(
             fname, self.interface, self.zap_channels,
+            outdir=self.outdir,
             features=self.features,
             qmask=self.qmask,
             despike=self.despike,
@@ -96,13 +102,18 @@ class CleanupWorker(object):
             report=self.report)
 
 
-def cleanup_main(filenames, fmt='psrchive', zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True, processes=1):
+def cleanup_main(filenames, fmt='psrchive', outdir=None, zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True, processes=1):
     log.debug("Files to process: {:d}".format(len(filenames)))
     log.debug("Format: {}".format(fmt))
     interface = clfd.interfaces.get_interface(fmt)
     zap_channels = load_zapfile(zapfile)
 
-    worker_func = CleanupWorker(interface, zap_channels, features=features,
+    # outdir = None means that data products for each input file 
+    # are placed in the same directory as that file
+    if outdir is not None:
+        outdir = os.path.realpath(outdir)
+
+    worker_func = CleanupWorker(interface, zap_channels, outdir=outdir, features=features,
                                 qmask=qmask, despike=despike, qspike=qspike, ext=ext, report=report)
 
     if processes > 1:
