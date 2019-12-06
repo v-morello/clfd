@@ -1,6 +1,8 @@
+[![arXiv](http://img.shields.io/badge/astro.ph-1811.04929-B31B1B.svg)](https://arxiv.org/abs/1811.04929)  ![License](https://img.shields.io/badge/License-MIT-green.svg)  ![Python versions](https://img.shields.io/pypi/pyversions/clfd.svg)
+
 # clfd
 
-**NOTE:** version 0.3.0 can now be installed via `pip install`. **Existing users: please read the installation instructions below before upgrading to 0.3+**
+**NOTE:** version 0.3+ can now be installed via `pip install`. **If you have an older version and want to upgrade please read the installation instructions below**
 
 ``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed. 
 
@@ -21,16 +23,18 @@ The implementation of the cleaning algorithms is entirely decoupled from the inp
 
 ## Python version
 
-The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but note that the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/) work only with python <= 2.7 on most systems. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
+The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but you will have to use whichever python version that your [PSRCHIVE](http://psrchive.sourceforge.net/) python bindings require. Recent (2019+) installations of psrchive may require python3, while older ones are only compatible with python2. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
 
 
 ## Dependencies
 
 Strict dependencies:  
+
 - ``numpy``
 - ``pandas``
 
 Optional but recommended:  
+
 - ``pytables``: to save and load cleaning reports in HDF5 format
 - ``matplotlib``: to plot cleaning reports in particular
 
@@ -38,7 +42,7 @@ Optional but recommended:
 ## Installation
 
 There are three main choices here, given in decreasing order of recommendation. 
-**Important note to EXISTING users**: the package name in `setup.py` was changed from `clfd-pulsar` to `clfd` in version 0.3.0. This has the potential to cause some trouble. **When upgrading from a version older than v0.3.0, users should first cleanly uninstall any older versions of** `clfd` by typing `pip uninstall clfd-pulsar`. Also, if you created a shell alias called `clfd` that points to `apps/cleanup.py`, please remove it, as the new setup script now automatically takes care of creating it (via a console_scripts entry point).
+**Important note to users of 0.2.x and earlier versions**: the package name in `setup.py` was changed from `clfd-pulsar` to `clfd` in version 0.3.0. This has the potential to cause some trouble. **When upgrading from a version older than v0.3.0, users should first cleanly uninstall any older versions of** `clfd` by typing `pip uninstall clfd-pulsar`. Also, if you created a shell alias called `clfd` that points to `apps/cleanup.py`, please remove it, as the new setup script now automatically takes care of creating it (via a console_scripts entry point).
 
 
 #### Installing with pip
@@ -179,6 +183,7 @@ array([[ True,  True,  True, ..., False, False, False],
 
 # In PSRCHIVE, every profile has a weight parameter. This sets the weight of every bad profile to 0.
 # We can then save the clean data as a new archive in PSRFITS format.
+>>> archive = psrchive.Archive_load("archive.ar")
 >>> PsrchiveInterface.apply_profile_mask(mask, archive)
 >>> PsrchiveInterface.save("archive_clean.ar", archive)
 

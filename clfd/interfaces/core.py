@@ -47,7 +47,9 @@ class PsrchiveInterface(Interface):
         """
         ipol = 0
         for isub, ichan in np.vstack(np.where(mask)).T:
-            archive.get_Profile(isub, ipol, ichan).set_weight(0.0)
+            # NOTE: cast indices from numpy.int64 to int, otherwise
+            # get_Profile() complains about argument type
+            archive.get_Profile(int(isub), ipol, int(ichan)).set_weight(0.0)
 
     @staticmethod
     def apply_time_phase_mask(mask, valid_chans, repvals, archive):
@@ -69,7 +71,9 @@ class PsrchiveInterface(Interface):
         
         for isub, bad_bins in repdict.items():
             for ichan in valid_chans:
-                amps = archive.get_Profile(isub, ipol, ichan).get_amps()
+                # NOTE: cast indices from numpy.int64 to int, otherwise
+                # get_Profile() complains about argument type
+                amps = archive.get_Profile(int(isub), ipol, int(ichan)).get_amps()
                 amps[bad_bins] = repvals[isub, ichan, bad_bins]
 
     @staticmethod

@@ -2,6 +2,13 @@
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 0.3.2 - 2019-12-06
+### Fixed
+- Fixed a bug that can occur with the new psrchive python3 bindings, where the code was passing sub-integration and channel indices as `numpy.int64` to the `archive.get_Profile()` method instead of a python `int`, and a `TypeError` was raised.
+
+### Changed
+- Updated statement in `README` about psrchive python bindings, as they are now compatible with python 3 in the latest psrchive version.
+
 ## 0.3.1 - 2019-11-19
 ### Added
 - The `clfd` command line application now has a `-o` / `--outdir` option to save all data products to a single output directory
