@@ -1,1 +1,4 @@
-from .core import get_interface, PsrchiveInterface
+from .core import get_interface
+
+from .core import (PfdInterface,
+                   PsrchiveInterface)

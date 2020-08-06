@@ -1,4 +1,5 @@
 import numpy as np
+
 from clfd import DataCube
 
 try:
@@ -6,20 +7,39 @@ try:
 except:
     pass
 
+try:
+    from ptypes.presto import PTypePFD
+except:
+    pass
+
 
 class Interface(object):
-    """ Base class for an interface to some file format. """
+
+    """
+    Base class for an interface to some file format.
+    """
+
     @staticmethod
     def get_frequencies(archive):
-        """ Return channel frequencies in MHz, as a numpy array"""
+
+        """
+        Return channel frequencies in MHz, as a numpy array.
+        """
+
         raise NotImplementedError
 
     @staticmethod
-    def apply_profile_mask(mask, archive):
+    def apply_profile_mask(mask,
+                           archive):
+
         raise NotImplementedError
 
     @staticmethod
-    def apply_time_phase_mask(mask, valid_chans, repvals, archive):
+    def apply_time_phase_mask(mask,
+                              valid_chans,
+                              repvals,
+                              archive):
+
         raise NotImplementedError
 
     @staticmethod
@@ -32,69 +52,114 @@ class Interface(object):
 
 
 class PsrchiveInterface(Interface):
-    """ Interface to PSRCHIVE format. """
+
+    """
+    Interface to PSRCHIVE format.
+    """
+
     @staticmethod
     def apply_profile_mask(mask, archive):
-        """ Apply profile mask to folded archive produced with PSRCHIVE, setting
-        the weights of masked profiles to zero.
+
+        """
+        Apply profile mask to folded archive produced
+        with PSRCHIVE, setting the weights of masked
+        profiles to zero.
 
         Parameters
         ----------
         mask: ndarray
-            The boolean mask obtained with the profile_mask() function.
+
+            The boolean mask obtained with the
+            `profile_mask()` function.
+
         archive: psrchive.Archive
-            The Archive object to which the mask will be applied.
+
+            The `Archive` object to which the mask
+            will be applied.
         """
+
         ipol = 0
+
         for isub, ichan in np.vstack(np.where(mask)).T:
-            # NOTE: cast indices from numpy.int64 to int, otherwise
-            # get_Profile() complains about argument type
+
+            # NOTE: cast indices from numpy.int64 to int,
+            # otherwise `get_Profile()` complains about
+            # argument type.
+
             archive.get_Profile(int(isub), ipol, int(ichan)).set_weight(0.0)
 
     @staticmethod
-    def apply_time_phase_mask(mask, valid_chans, repvals, archive):
-        """ Apply time-phase mask to folded archive produced with PSRCHIVE, setting
-        the values of bad time-phase bins along the frequency dimension to appropriate
-        replacement values. All arguments except the last are the output of the
-        time_phase_mask() function.
+    def apply_time_phase_mask(mask,
+                              valid_chans,
+                              repvals,
+                              archive):
+
         """
+        Apply time-phase mask to folded archive produced
+        with PSRCHIVE, setting the values of bad time-phase
+        bins along the frequency dimension to appropriate
+        replacement values. All arguments except the last
+        are the output of the `time_phase_mask()` function.
+        """
+
         ipol = 0
 
-        # Replacement dictionary
+        # Replacement dictionary, which stores
+        # the bad phase bins (as we get from by
+        # CLFD) for each sub-integration index
+        # as:
+        #
         # {subint_index: [bad_phase_bins]}
+
         repdict = {}
+
         num_subints, num_bins = mask.shape
+
         for isub in range(num_subints):
             bad_bins = np.where(mask[isub])[0]
             if len(bad_bins):
                 repdict[isub] = bad_bins
-        
+
+        # Apply the time-phase mask to the archive.
+
         for isub, bad_bins in repdict.items():
             for ichan in valid_chans:
-                # NOTE: cast indices from numpy.int64 to int, otherwise
-                # get_Profile() complains about argument type
+
+                # NOTE: cast indices from numpy.int64 to int,
+                # otherwise `get_Profile()` complains about
+                # argument type.
+
                 amps = archive.get_Profile(int(isub), ipol, int(ichan)).get_amps()
                 amps[bad_bins] = repvals[isub, ichan, bad_bins]
 
     @staticmethod
     def get_frequencies(archive):
-        """ Return channel frequencies as a numpy array """
-        # NOTE 14/02/2019: a recent (end of 2018 ?) psrchive version has a
-        # get_frequencies() method to get the list of all channel freqs.
-        # However, older ones don't, such as the 19/03/2018 version. Can't
-        # find a trace of get_frequencies() in the docs anyway:
+
+        """
+        Return channel frequencies as a numpy array.
+        """
+
+        # NOTE 14/02/2019: a recent (end of 2018?) psrchive
+        # version has a get_frequencies() method to get the
+        # list of all channel freqs. However, older ones don't,
+        # such as the 19/03/2018 version. Can't find a trace
+        # of get_frequencies() in the docs anyway:
         # http://psrchive.sourceforge.net/classes/psrchive/classPulsar_1_1Archive.shtml
-        
+
         n = archive.get_nchan()
-        # bw can be negative, which means that the first channel is the one
-        # with the top frequency 
+
+        # Bandwidth `bw` can be negative, which means that the
+        # first channel is the one with the top frequency.
+
         bw = archive.get_bandwidth()
         cw = bw / n
         fc = archive.get_centre_frequency()
 
-        # Centre frequencies of first and last channel
+        # Centre frequencies of first and last channel.
+
         fch1 = fc - (bw - cw) / 2.0
         fchn = fc + (bw - cw) / 2.0
+
         return np.linspace(fch1, fchn, n)
 
     @staticmethod
@@ -107,11 +172,119 @@ class PsrchiveInterface(Interface):
         archive.unload(fname)
 
 
+class PfdInterface(Interface):
+
+    """
+    Interface to PRESTO's PFD format.
+    """
+
+    @staticmethod
+    def apply_profile_mask(mask,
+                           pfd):
+
+        """
+        Apply the profile mask to folded data produced
+        with `PRESTO`, stored in the `PFD` format. Since
+        `PFD` files don't have weights, we have to set
+        the amplitudes of the profiles directly to zero.
+
+        Parameters
+        ----------
+        mask: ndarray
+
+            The boolean mask obtained with the
+            `profile_mask()` function.
+
+        pfd: ptypes.PTypePFD
+
+            The `PTypePFD` object to which the mask
+            will be applied.
+        """
+
+        profiles = pfd.profs
+
+        for ipart, isub in np.vstack(np.where(mask)).T:
+            profiles[ipart][isub] = 0.0
+
+    @staticmethod
+    def apply_time_phase_mask(mask,
+                              valid_chans,
+                              repvals,
+                              pfd):
+
+        """
+        Apply the time-phase mask to folded data produced
+        with `PRESTO`, stored in the `PFD` format. We are
+        setting the values of bad time-phase bins along the
+        frequency dimension to appropriate replacement values.
+        All arguments except the last are the output of the
+        `time_phase_mask()` function.
+        """
+
+        profiles = pfd.profs
+
+        repdict = {}
+        numparts, numbins = mask.shape
+        for ipart in range(numparts):
+            bad_bins = np.where(mask[ipart])[0]
+            if len(bad_bins):
+                repdict[ipart] = bad_bins
+
+        for ipart, bad_bins in repdict.items():
+            for isub in valid_chans:
+                amps = profiles[ipart][isub]
+                amps[bad_bins] = repvals[ipart, isub, bad_bins]
+
+    @staticmethod
+    def get_frequencies(pfd):
+
+        """
+        Return channel frequencies as a numpy array.
+        """
+
+        n  = pfd.numchan
+        cw = pfd.chanwidth
+
+        bw = n * cw
+
+        fch1 = pfd.lofreq
+        fchn = pfd.lofreq + (bw - cw)
+
+        return np.linspace(fch1, fchn, n)
+
+    @staticmethod
+    def load(fname):
+
+        """
+        """
+
+        pfd = PTypePFD(fname)
+        return pfd, DataCube.from_pfd(pfd)
+
+    @staticmethod
+    def save(fname, pfd):
+
+        """
+        """
+
+        pfd.write(fname)
+
+
 def get_interface(fmt):
-    """ Get Interface class for given format name. """
-    interfaces = {"psrchive": PsrchiveInterface}
+
+    """
+    Get Interface class for given format name.
+    """
+
+    interfaces = {
+        'pfd': PfdInterface,
+        'psrchive': PsrchiveInterface,
+        }
+
     fmt = fmt.lower()
+
     if not fmt in interfaces:
         msg = "No interface for format: {:s}".format(fmt)
         raise ValueError(msg)
+
     return interfaces[fmt]
