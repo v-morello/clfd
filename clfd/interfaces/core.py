@@ -86,7 +86,9 @@ class PsrchiveInterface(Interface):
             # otherwise `get_Profile()` complains about
             # argument type.
 
-            archive.get_Profile(int(isub), ipol, int(ichan)).set_weight(0.0)
+            archive.get_Profile(int(isub),
+                                ipol,
+                                int(ichan)).set_weight(0.0)
 
     @staticmethod
     def apply_time_phase_mask(mask,
@@ -129,8 +131,13 @@ class PsrchiveInterface(Interface):
                 # otherwise `get_Profile()` complains about
                 # argument type.
 
-                amps = archive.get_Profile(int(isub), ipol, int(ichan)).get_amps()
-                amps[bad_bins] = repvals[isub, ichan, bad_bins]
+                amps = archive.get_Profile(int(isub),
+                                           ipol,
+                                           int(ichan)).get_amps()
+
+                amps[bad_bins] = repvals[isub,
+                                         ichan,
+                                         bad_bins]
 
     @staticmethod
     def get_frequencies(archive):
@@ -164,11 +171,22 @@ class PsrchiveInterface(Interface):
 
     @staticmethod
     def load(fname):
+
+        """
+        Load a `PSRCHIVE` file. Returns a `psrchive.Archive`
+        object and a `DataCube` with the folded data wrapped.
+        """
+
         archive = psrchive.Archive_load(fname)
         return archive, DataCube.from_psrchive(archive)
 
     @staticmethod
     def save(fname, archive):
+
+        """
+        Save a `psrchive.Archive` object into a `PSRCHIVE` file.
+        """
+
         archive.unload(fname)
 
 
@@ -233,7 +251,9 @@ class PfdInterface(Interface):
         for ipart, bad_bins in repdict.items():
             for isub in valid_chans:
                 amps = profiles[ipart][isub]
-                amps[bad_bins] = repvals[ipart, isub, bad_bins]
+                amps[bad_bins] = repvals[ipart,
+                                         isub,
+                                         bad_bins]
 
     @staticmethod
     def get_frequencies(pfd):
@@ -256,6 +276,8 @@ class PfdInterface(Interface):
     def load(fname):
 
         """
+        Load a `PFD` file. Returns a 'PTypePFD' object
+        and a `DataCube` with the folded data wrapped.
         """
 
         pfd = PTypePFD(fname)
@@ -265,6 +287,7 @@ class PfdInterface(Interface):
     def save(fname, pfd):
 
         """
+        Save the `PTypePFD` object into a `PFD` file.
         """
 
         pfd.write(fname)
