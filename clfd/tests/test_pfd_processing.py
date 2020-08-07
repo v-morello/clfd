@@ -25,10 +25,6 @@ class TestPfdProcessing(unittest.TestCase):
                                            "pfd_example.pfd")
         self.nchan = 4096
 
-        # frequency offset (i.e. channel width),
-        # negative because the first channel has
-        # the highest frequency.
-
         self.foff = 0.048828
         self.fch1 = 300.024926
         self.frequencies = self.fch1 + self.foff * numpy.arange(self.nchan)

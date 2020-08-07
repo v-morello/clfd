@@ -37,7 +37,7 @@ def parse_arguments():
     parser.add_argument(
         "--fmt",
         type=str,
-        choices=["psrchive"],
+        choices=["psrchive","pfd"],
         default="psrchive",
         help="Input file format",
     )
