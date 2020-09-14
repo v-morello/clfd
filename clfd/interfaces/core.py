@@ -29,16 +29,12 @@ class Interface(object):
         raise NotImplementedError
 
     @staticmethod
-    def apply_profile_mask(mask,
-                           archive):
+    def apply_profile_mask(mask, archive):
 
         raise NotImplementedError
 
     @staticmethod
-    def apply_time_phase_mask(mask,
-                              valid_chans,
-                              repvals,
-                              archive):
+    def apply_time_phase_mask(mask, valid_chans, repvals, archive):
 
         raise NotImplementedError
 
@@ -86,15 +82,10 @@ class PsrchiveInterface(Interface):
             # otherwise `get_Profile()` complains about
             # argument type.
 
-            archive.get_Profile(int(isub),
-                                ipol,
-                                int(ichan)).set_weight(0.0)
+            archive.get_Profile(int(isub), ipol, int(ichan)).set_weight(0.0)
 
     @staticmethod
-    def apply_time_phase_mask(mask,
-                              valid_chans,
-                              repvals,
-                              archive):
+    def apply_time_phase_mask(mask, valid_chans, repvals, archive):
 
         """
         Apply time-phase mask to folded archive produced
@@ -131,13 +122,9 @@ class PsrchiveInterface(Interface):
                 # otherwise `get_Profile()` complains about
                 # argument type.
 
-                amps = archive.get_Profile(int(isub),
-                                           ipol,
-                                           int(ichan)).get_amps()
+                amps = archive.get_Profile(int(isub), ipol, int(ichan)).get_amps()
 
-                amps[bad_bins] = repvals[isub,
-                                         ichan,
-                                         bad_bins]
+                amps[bad_bins] = repvals[isub, ichan, bad_bins]
 
     @staticmethod
     def get_frequencies(archive):
@@ -197,8 +184,7 @@ class PfdInterface(Interface):
     """
 
     @staticmethod
-    def apply_profile_mask(mask,
-                           pfd):
+    def apply_profile_mask(mask, pfd):
 
         """
         Apply the profile mask to folded data produced
@@ -225,10 +211,7 @@ class PfdInterface(Interface):
             profiles[ipart][isub] = 0.0
 
     @staticmethod
-    def apply_time_phase_mask(mask,
-                              valid_chans,
-                              repvals,
-                              pfd):
+    def apply_time_phase_mask(mask, valid_chans, repvals, pfd):
 
         """
         Apply the time-phase mask to folded data produced
@@ -251,9 +234,7 @@ class PfdInterface(Interface):
         for ipart, bad_bins in repdict.items():
             for isub in valid_chans:
                 amps = profiles[ipart][isub]
-                amps[bad_bins] = repvals[ipart,
-                                         isub,
-                                         bad_bins]
+                amps[bad_bins] = repvals[ipart, isub, bad_bins]
 
     @staticmethod
     def get_frequencies(pfd):
@@ -262,7 +243,7 @@ class PfdInterface(Interface):
         Return channel frequencies as a numpy array.
         """
 
-        n  = pfd.numchan
+        n = pfd.numchan
         cw = pfd.chanwidth
 
         bw = n * cw
@@ -300,9 +281,9 @@ def get_interface(fmt):
     """
 
     interfaces = {
-        'pfd': PfdInterface,
-        'psrchive': PsrchiveInterface,
-        }
+        "pfd": PfdInterface,
+        "psrchive": PsrchiveInterface,
+    }
 
     fmt = fmt.lower()
 

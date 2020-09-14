@@ -10,9 +10,11 @@ from utils import get_example_data_path
 
 try:
     from ptypes.presto import PTypePFD
+
     HAS_PTYPES = True
 except ImportError:
     HAS_PTYPES = False
+
 
 class TestPfdProcessing(unittest.TestCase):
 
@@ -21,8 +23,7 @@ class TestPfdProcessing(unittest.TestCase):
     """
 
     def setUp(self):
-        self.pfd_data_fname = os.path.join(get_example_data_path(),
-                                           "pfd_example.pfd")
+        self.pfd_data_fname = os.path.join(get_example_data_path(), "pfd_example.pfd")
         self.nchan = 4096
 
         self.foff = 0.048828
@@ -45,16 +46,15 @@ class TestPfdProcessing(unittest.TestCase):
 
         pfd, cube = PfdInterface.load(self.pfd_data_fname)
 
-        with tempfile.NamedTemporaryFile(mode="wb",
-                                         suffix='.pfd',
-                                         delete=False) as fobj:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", suffix=".pfd", delete=False
+        ) as fobj:
             fname = fobj.name
         PfdInterface.save(fname, pfd)
 
         pfd2, cube2 = PfdInterface.load(fname)
 
-        self.assertTrue(numpy.allclose(cube.orig_data,
-                                       cube2.orig_data))
+        self.assertTrue(numpy.allclose(cube.orig_data, cube2.orig_data))
         os.remove(fname)
 
     @unittest.skipUnless(HAS_PTYPES, "")
@@ -79,7 +79,9 @@ class TestPfdProcessing(unittest.TestCase):
         q = 2.0
         zap_channels = range(10)
 
-        mask, valid_chans, repvals = time_phase_mask(cube, q=q, zap_channels=zap_channels)
+        mask, valid_chans, repvals = time_phase_mask(
+            cube, q=q, zap_channels=zap_channels
+        )
         PfdInterface.apply_time_phase_mask(mask, valid_chans, repvals, pfd)
 
         ##### Check replacement of values behaves as expected. #####

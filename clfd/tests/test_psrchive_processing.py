@@ -10,6 +10,7 @@ from utils import get_example_data_path
 
 try:
     import psrchive
+
     HAS_PSRCHIVE = True
 except ImportError:
     HAS_PSRCHIVE = False
@@ -17,9 +18,11 @@ except ImportError:
 
 class TestPsrchiveProcessing(unittest.TestCase):
     """ Test PSRCHIVE interface. """
+
     def setUp(self):
-        self.psrchive_data_fname = os.path.join(get_example_data_path(),
-                                                "psrchive_example.ar")
+        self.psrchive_data_fname = os.path.join(
+            get_example_data_path(), "psrchive_example.ar"
+        )
         self.nchan = 128
 
         # frequency offset (i.e. channel width),
@@ -46,9 +49,7 @@ class TestPsrchiveProcessing(unittest.TestCase):
 
         archive, cube = PsrchiveInterface.load(self.psrchive_data_fname)
 
-        with tempfile.NamedTemporaryFile(mode="wb",
-                                         suffix='.ar',
-                                         delete=False) as fobj:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".ar", delete=False) as fobj:
             fname = fobj.name
         PsrchiveInterface.save(fname, archive)
 
@@ -59,9 +60,7 @@ class TestPsrchiveProcessing(unittest.TestCase):
         # parameter for each profile. Hence the
         # higher than default tolerance.
 
-        self.assertTrue(numpy.allclose(cube.orig_data,
-                                       cube2.orig_data,
-                                       atol=1e-6))
+        self.assertTrue(numpy.allclose(cube.orig_data, cube2.orig_data, atol=1e-6))
         os.remove(fname)
 
     @unittest.skipUnless(HAS_PSRCHIVE, "")
@@ -86,7 +85,9 @@ class TestPsrchiveProcessing(unittest.TestCase):
         q = 2.0
         zap_channels = range(10)
 
-        mask, valid_chans, repvals = time_phase_mask(cube, q=q, zap_channels=zap_channels)
+        mask, valid_chans, repvals = time_phase_mask(
+            cube, q=q, zap_channels=zap_channels
+        )
         PsrchiveInterface.apply_time_phase_mask(mask, valid_chans, repvals, archive)
 
         ##### Check replacement of values behaves as expected. #####

@@ -1,6 +1,7 @@
 import unittest
 import os
 
+
 def test():
     """ Run all unit tests """
     loader = unittest.TestLoader()

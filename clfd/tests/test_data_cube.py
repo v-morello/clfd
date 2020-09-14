@@ -8,6 +8,7 @@ from utils import get_example_data_path
 
 try:
     import psrchive
+
     HAS_PSRCHIVE = True
 except ImportError:
     HAS_PSRCHIVE = False
@@ -15,9 +16,12 @@ except ImportError:
 
 class TestDataCube(unittest.TestCase):
     """ Check the DataCube class methods. """
+
     def setUp(self):
         self.npy_data_fname = os.path.join(get_example_data_path(), "npy_example.npy")
-        self.psrchive_data_fname = os.path.join(get_example_data_path(), "psrchive_example.ar")
+        self.psrchive_data_fname = os.path.join(
+            get_example_data_path(), "psrchive_example.ar"
+        )
         self.ndarray = numpy.load(self.npy_data_fname)
 
     def test_init(self):
@@ -48,9 +52,9 @@ class TestDataCube(unittest.TestCase):
             clfd.DataCube(self.ndarray[:1, :1, :])
 
     def test_load_save_npy(self):
-        with tempfile.NamedTemporaryFile(mode="wb", suffix='.npy') as fobj:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".npy") as fobj:
             fname = fobj.name
-        
+
             # NOTE: leaving self.ndarray untouched
             cube1 = clfd.DataCube(self.ndarray, copy=True)
             cube1.save_npy(fname)

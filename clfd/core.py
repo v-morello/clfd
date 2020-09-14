@@ -210,17 +210,15 @@ class DataCube(object):
 
     def __str__(self):
         return "{:s}(shape=({:d}, {:d}, {:d}))".format(
-            type(self).__name__,
-            self.num_subints,
-            self.num_chans,
-            self.num_bins)
+            type(self).__name__, self.num_subints, self.num_chans, self.num_bins
+        )
 
     def __repr__(self):
         return str(self)
 
 
 def featurize(cube, features=("std", "ptp", "lfamp")):
-    """ Compute specified set of features for every profile
+    """Compute specified set of features for every profile
     in the given DataCube.
 
     Parameters
@@ -277,13 +275,7 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
             raise ValueError(msg)
 
     index = pandas.MultiIndex.from_product(
-        [
-            range(cube.num_subints),
-            range(cube.num_chans)
-         ],
-
-        names=["subint",
-               "channel"]
+        [range(cube.num_subints), range(cube.num_chans)], names=["subint", "channel"]
     )
     data = OrderedDict()
     for fn in features:
@@ -417,9 +409,7 @@ def profile_mask(features, q=2.0, zap_channels=[]):
 
     # Flag outliers, now including zapped channels again
 
-    mask = (features
-            > stats.loc["vmax"]) | (features
-                                    < stats.loc["vmin"])
+    mask = (features > stats.loc["vmax"]) | (features < stats.loc["vmin"])
 
     mask = mask.sum(axis=1).values
     mask = mask.astype(bool)
@@ -428,7 +418,7 @@ def profile_mask(features, q=2.0, zap_channels=[]):
     # Forcibly mask zapped channels
 
     if do_zap:
-	    mask[:, zap_channels] = True
+        mask[:, zap_channels] = True
     return stats, mask
 
 
@@ -494,17 +484,15 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
     stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
     stats.loc["vmax"] = stats.loc["q3"] + q * stats.loc["iqr"]
 
-    mask = (data
-            < stats.loc["vmin"].values) | (data
-                                           > stats.loc["vmax"].values)
+    mask = (data < stats.loc["vmin"].values) | (data > stats.loc["vmax"].values)
 
     nsubs, nchans, nbins = cube.data.shape
 
     # NOTE: Don't forget to offset replacement values by
     # profile baselines.
 
-    repvals = (stats.loc["med"].values
-               / num_valid_chans
-               + cube.baselines.reshape(nsubs, nchans, 1))
+    repvals = stats.loc["med"].values / num_valid_chans + cube.baselines.reshape(
+        nsubs, nchans, 1
+    )
 
     return mask, valid_chans, repvals
