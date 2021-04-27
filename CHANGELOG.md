@@ -2,6 +2,12 @@
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 0.3.3 - 2021-04-27
+### Added
+- New features: skewness, excess kurtosis, autocorrelation. These are not sensitive to the scale of the data, and should perform better on high bit depth data (8-bit and more).
+- `scipy` is now an additional dependency (for `skew` and `kurtosis` functions).
+
+
 ## 0.3.2 - 2019-12-06
 ### Fixed
 - Fixed a bug that can occur with the new psrchive python3 bindings, where the code was passing sub-integration and channel indices as `numpy.int64` to the `archive.get_Profile()` method instead of a python `int`, and a `TypeError` was raised.

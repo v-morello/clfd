@@ -29,7 +29,8 @@ setup(
     install_requires=[
         'numpy', 
         'pandas', 
-        'tables'
+        'tables',
+        'scipy'
         ],
     license='MIT License',
 

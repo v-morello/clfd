@@ -2,8 +2,6 @@
 
 # clfd
 
-**NOTE:** version 0.3+ can now be installed via `pip install`. **If you have an older version and want to upgrade please read the installation instructions below**
-
 ``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed. 
 
 ## Citation
@@ -32,6 +30,7 @@ Strict dependencies:
 
 - ``numpy``
 - ``pandas``
+- ``scipy``
 
 Optional but recommended:  
 
@@ -86,11 +85,27 @@ This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/lates
 
 #### The PYTHONPATH method
 
-If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters) or like to play it old school, then you can simply clone the repository and add the base directory of ``clfd`` to your ``PYTHONPATH`` environment variable, but then:
+If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters) or like to play it old school, then you can simply clone the repository and add the base directory of ``clfd`` to your ``PYTHONPATH`` environment variable, but then:  
 1. You have to install the required dependencies manually.
 2. The main command-line application `clfd` (see below) will **NOT** be placed in your `PATH` automatically, which means that you may want to create a shell alias that points to `clfd/apps/cleanup.py` to make life enjoyable.
 
 I warmly recommend using one of the methods above unless you have no other option.
+
+
+## What features / profile statistics to use
+
+`clfd` identifies bad profiles in a folded data cube based on whether certain profile features (i.e. summary statistics) are outside an acceptable range of values inferred from the majority of the data. The user may choose a combination of the following features on the command line (see below):
+- `ptp`: peak to peak difference
+- `std`: standard deviation
+- `var`: variance
+- `lfamp`: amplitude of second bin in the Fourier transform of the profile
+- `skew`: skewness
+- `kurtosis`: excess kurtosis
+- `acf`: autocorrelation with a lag of 1 phase bin
+
+**The choice of profile features should be motivated by the dynamic range of the data.** Depending on the digitization / scaling scheme employed by the telescope backend, on some observing systems the mean and scale of the data may vary wildly across the band and the mean / standard deviation of the data in a given channel do not correlate well with the presence of interference. In such cases, you should use features that are insensitive to the scale of the data. The official recommendation is as follows, but feel free to experiment:  
+- Low dynamic range: `std`, `ptp` and/or `lfamp`. Recommended for older 1-bit and 2-bit Parkes multibeam receiver data for example.
+- High dynamic range: `skew`, `kurtosis`, and/or `acf`. Recommended for any Parkes UWL data in particular.
 
 
 ## Command line usage
@@ -101,7 +116,12 @@ If your installation went well, a command-line application `clfd` should now app
 clfd -h
 ```
 
-Running with default arguments should work very well in the vast majority of cases. For example, to process a batch of `PSRCHIVE` archive files placed in the ``~/folded_data`` directory:
+Running with default arguments should work well in most of cases, **but the choice of profile features should be strongly motivated by the dynamic range of the data.** On some observing systems, the mean and scale of the data can vary wildly across the band and thus the mean and standard deviation of the data in a given channel do not correlate well with the presence of interference. In such cases, you should use features that are insensitive to the scale of the data. The official recommendation is:  
+- Low dynamic range / bit depth: `std`, `ptp` and/or `lfamp`. Recommended for 1-bit and 2-bit Parkes multibeam receiver data in particular.
+- High dynamic range: `skew`, `kurtosis`, and/or `acf`. Recommended for any Parkes UWL data in particular.
+
+
+For example, to process a batch of `PSRCHIVE` archive files placed in the ``~/folded_data`` directory:
 ```
 clfd ~/folded_data/*.ar
 ```
