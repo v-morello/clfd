@@ -1,6 +1,7 @@
-global-include *.py 
-global-include *.md
+graft src
+
+include *.md
+
 include LICENSE
-include Makefile
-include clfd/example_data/*
-prune .vscode
+include setup.cfginclude versioneer.py
+include src/clfd/_version.py

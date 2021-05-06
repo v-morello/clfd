@@ -1,0 +1,5 @@
+[run]
+include =
+    src/clfd/*
+omit =
+    src/clfd/_version.py
