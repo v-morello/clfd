@@ -28,12 +28,7 @@ setup(
     long_description_content_type="text/markdown",
     version=version,
     packages=setuptools.find_packages(),
-    install_requires=[
-        "numpy",
-        "pandas",
-        "tables",
-        "pulsartypes",
-    ],
+    install_requires=["numpy", "pandas", "tables", "scipy"],
     license="MIT License",
     entry_points={
         "console_scripts": ["clfd=clfd.apps.cleanup:main"],
