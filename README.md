@@ -18,11 +18,11 @@ If using [**clfd**][clfd] contributes to a project that leads to a scientific pu
 A detailed explanation of [**clfd**][clfd]'s algorithms and a visual demonstration of what they can do on real Parkes data can be found in section 2.4. The idea is to convert each profile (there is one profile per channel and per sub-integration) to a small set of representative features (e.g. standard deviation, peak-to-peak difference) and to flag outliers in the resulting feature space. Since v0.2.2, [**clfd**][clfd]  outputs report plots to visualize the outlier flagging process and the resulting two-dimensional time-frequency mask applied to the clean archive. Here's the output of a [**clfd**][clfd] run on a Parkes observation of the pulsar J0735-62, where the red lines delimit the automatically inferred acceptable value range for each feature:
 
 [clfd]: https://github.com/v-morello/clfd
-[tests]: https://github.com/v-morello/clfd/actions/workflows/tests.yaml/badge.svg
+[tests]: https://github.com/astrogewgaw/clfd/actions/workflows/tests.yaml/badge.svg
 [black]: https://github.com/psf/black
 [black-badge]: https://img.shields.io/badge/code%20style-black-000000.svg
-[coveralls]: https://coveralls.io/github/v-morello/clfd?branch=main
-[coveralls-badge]: https://coveralls.io/repos/github/v-morello/clfd/badge.svg?branch=main
+[coveralls]: https://coveralls.io/github/astrogewgaw/clfd?branch=feature
+[coveralls-badge]: https://coveralls.io/repos/github/astrogewgaw/clfd/badge.svg?branch=feature
 [arXiv]: https://arxiv.org/abs/1811.04929
 [arXiv-badge]: http://img.shields.io/badge/astro.ph-1811.04929-B31B1B.svg
 [license-badge]: https://img.shields.io/badge/License-MIT-green.svg
