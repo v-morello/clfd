@@ -1,4 +1,4 @@
-from clfd import mask_time_phz
+from clfd import time_phz_mask
 
 
 def test_time_phase_masking(cube):
@@ -11,16 +11,16 @@ def test_time_phase_masking(cube):
     zapchans = range(10)
     allchans = range(cube.nchan)
 
-    mask, vchans, vnew = mask_time_phz(
-        cube=cube,
+    mask, valid_chans, new_values = time_phz_mask(
+        data=cube.data,
         Q=Q,
         zapchans=zapchans,
     )
 
-    union = set(zapchans).union(set(vchans))
-    isect = set(zapchans).intersection(set(vchans))
+    union = set(zapchans).union(set(valid_chans))
+    isect = set(zapchans).intersection(set(valid_chans))
     assert not isect
     assert union == set(allchans)
 
-    assert vnew.shape == cube.data.shape
+    assert new_values.shape == cube.data.shape
     assert mask.shape == (cube.nsub, cube.nbin)

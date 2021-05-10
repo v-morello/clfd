@@ -2,7 +2,7 @@ import numpy as np
 
 from clfd import (
     featurize,
-    mask_profile,
+    profile_mask,
     profile_features,
 )
 
@@ -24,11 +24,11 @@ def test_profile_mask(cube):
     Test clfd's ability to construct a profile mask.
     """
 
-    features = featurize(cube, features=profile_features.keys())
-    _, __ = mask_profile(features=features)
+    features = featurize(cube.data, features=profile_features.keys())
+    _, __ = profile_mask(features=features)
 
     zapchans = np.arange(0, cube.nchan, 2)
-    _, mask = mask_profile(
+    _, mask = profile_mask(
         features=features,
         Q=1000.0,
         zapchans=zapchans,

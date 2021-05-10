@@ -136,11 +136,11 @@ def time_phz_mask(
     valid_chans = np.where(chanmask)[0]
     num_valids = valid_chans.sum()
 
-    data = data[:, valid_chans].sum(axis=1)
+    scrunch = data[:, valid_chans].sum(axis=1)
 
     stats = pd.DataFrame(
         np.percentile(
-            data,
+            scrunch,
             [25, 50, 75],
             axis=0,
         )
@@ -150,15 +150,19 @@ def time_phz_mask(
     stats.loc["vmin"] = stats.loc["q1"] - (Q * stats.loc["iqr"])
     stats.loc["vmax"] = stats.loc["q3"] + (Q * stats.loc["iqr"])
 
-    upper = data < stats.loc["vmin"].values
-    lower = data > stats.loc["vmax"].values
-
+    upper = scrunch < stats.loc["vmin"].values
+    lower = scrunch > stats.loc["vmax"].values
     mask = (upper) | (lower)
-    bads = [np.where(row)[0] for row in mask]
-    bads = [bad for bad in bads if bad.size > 0]
 
     med = stats.loc["med"].values
 
-    new_values = med / num_valids
+    nsubs, nchans, _ = data.shape
+    new_values = (
+        med / num_valids
+        + np.median(
+            data,
+            axis=2,
+        ).reshape(nsubs, nchans, 1)
+    )
 
     return mask, valid_chans, new_values

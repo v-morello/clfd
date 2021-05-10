@@ -9,9 +9,13 @@ from setuptools import setup, find_packages
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 install_requires = [
+    "rich",
+    "click",
     "numpy",
     "scipy",
     "pandas",
+    "matplotlib",
+    "priwo@git+https://github.com/astrogewgaw/priwo.git@main#egg=priwo",
 ]
 
 
