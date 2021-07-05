@@ -2,8 +2,14 @@ import attr
 import numpy as np
 
 from pathlib import Path
-from priwo import read_pfd, write_pfd
-from typing import Dict, List, Iterable, Optional
+from priwo import read_pfd, write_pfd  # type:ignore
+
+from typing import (
+    Dict,
+    List,
+    Iterable,
+    Optional,
+)
 
 from .mask import (
     featurize,
@@ -21,9 +27,8 @@ class Cube(object):
     """"""
 
     data: np.ndarray
-
     fname: Optional[str] = None
-    finfo: Optional[Dict] = None
+    meta: Optional[Dict] = None
 
     def __str__(self):
         return "\n".join(
@@ -34,7 +39,7 @@ class Cube(object):
                 f"Number of (sub-)channels: {self.nchan}",
                 f"Number of bins in each profile: {self.nbin}",
                 f"Name of data file: {self.fname}",
-                f"Cleaned? {(lambda: 'Yes' if hasattr(self, '_cleaned') else 'No')()}",
+                f"Cleaned? {(lambda: 'Yes' if self.cleaned is not None else 'No')()}",
             ]
         )
 
@@ -197,12 +202,12 @@ class Cube(object):
         """"""
 
         fname = str(Path(fname).resolve())
-        finfo = read_pfd(fname)
-        data = finfo.pop("profs")
+        meta = read_pfd(fname)
+        data = meta.pop("profs")
         cube = cls(
             data,
             fname=fname,
-            finfo=finfo,
+            meta=meta,
         )
         cube.subtract_baselines()
         return cube
@@ -234,8 +239,8 @@ class Cube(object):
         if fname is None:
             fname = self.fname
 
-        if self.finfo is not None:
-            self.finfo["profs"] = self.original.astype(dtype)
-            write_pfd(self.finfo, fname)
+        if self.meta is not None:
+            self.meta["profs"] = self.original.astype(dtype)
+            write_pfd(self.meta, fname)
         else:
             raise IOError("There is no metadata. Cannot write the cube to a PFD file.")

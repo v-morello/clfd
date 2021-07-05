@@ -1,6 +1,6 @@
 import numpy as np
-import pandas as pd
-import scipy.stats as st
+import pandas as pd  # type:ignore
+import scipy.stats as st  # type: ignore
 
 from typing import (
     List,

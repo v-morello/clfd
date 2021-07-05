@@ -3,7 +3,7 @@ import attr
 import base64
 import warnings
 import numpy as np
-import pandas as pd
+import pandas as pd  # type:ignore
 
 from pathlib import Path
 from textwrap import dedent
@@ -12,8 +12,8 @@ from typing import List, Dict, Tuple, Union, Optional
 
 try:
 
-    import matplotlib.pyplot as plt
-    from matplotlib.gridspec import GridSpec
+    import matplotlib.pyplot as plt  # type:ignore
+    from matplotlib.gridspec import GridSpec  # type:ignore
 
     MATPLOTLIB_WARNING = None
 
