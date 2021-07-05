@@ -20,8 +20,3 @@ __all__ = [
     "time_phz_mask",
     "profile_features",
 ]
-
-from ._version import get_versions  # type: ignore
-
-__version__ = get_versions()["version"]
-del get_versions

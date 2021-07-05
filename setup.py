@@ -1,27 +1,25 @@
-# type: ignore
-
-import pathlib
-import versioneer
-
-from setuptools import setup, find_packages
+from pathlib import Path
+from setuptools import setup, find_packages  # type: ignore
 
 
-here = pathlib.Path(__file__).parent.resolve()
+here = Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
+
 install_requires = [
     "rich",
     "click",
     "numpy",
     "scipy",
+    "priwo",
     "pandas",
     "matplotlib",
-    "priwo@git+https://github.com/astrogewgaw/priwo.git@main#egg=priwo",
 ]
 
 
 setup(
     name="clfd",
-    version=versioneer.get_version(),
+    use_scm_version=True,
+    setup_requires=["setuptools_scm"],
     description="Smart RFI removal algorithms to be used on folded pulsar search and timing data",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -53,6 +51,6 @@ setup(
         "Source": "https://github.com/v-morello/clfd",
         "Bug Reports": "https://github.com/v-morello/clfd/issues",
     },
-    cmd_class=versioneer.get_cmdclass(),
+    cmd_class={},
     zip_safe=False,
 )
