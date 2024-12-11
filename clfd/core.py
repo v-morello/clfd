@@ -112,7 +112,10 @@ class DataCube(object):
             DataCube instance wrapping Stokes I data.
         """
         if type(archive) == str:
-            archive = psrchive.Archive_load(archive)
+	    	if hasattr(psrchive, "Archive_load"):
+	        	archive = psrchive.Archive_load(archive)
+	    	elif hasattr(psrchive, "Archive.load"):
+	        	archive = psrchive.Archive.load(archive)
 
         # Extract Stokes I only
         # Data shape is (n_subints, n_channels, n_phase_bins)
