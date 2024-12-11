@@ -113,10 +113,10 @@ class DataCube(object):
         """
         if type(archive) == str:
             if hasattr(psrchive, "Archive_load"):
-                archive = psrchive.Archive_load(fname)
-        	else:
+                archive = psrchive.Archive_load(archive)
+            else:
                 try:
-                    archive = psrchive.Archive.load(fname)
+                    archive = psrchive.Archive.load(archive)
                 except AttributeError:
                     raise
 	    # If neither of the above resolve, there is a
