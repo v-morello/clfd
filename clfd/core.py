@@ -112,15 +112,13 @@ class DataCube(object):
             DataCube instance wrapping Stokes I data.
         """
         if type(archive) == str:
-            if hasattr(psrchive, "Archive_load"):
+            try:
                 archive = psrchive.Archive_load(archive)
-            else:
-                try:
-                    archive = psrchive.Archive.load(archive)
-                except AttributeError:
-                    raise
+            except AttributeError:
+                archive = psrchive.Archive.load(archive)
 	    # If neither of the above resolve, there is a
-	    # PSRCHIVE installation problem.
+	    # PSRCHIVE installation problem and we want to
+        # terminate execution anyway.
 
         # Extract Stokes I only
         # Data shape is (n_subints, n_channels, n_phase_bins)

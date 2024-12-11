@@ -99,15 +99,13 @@ class PsrchiveInterface(Interface):
 
     @staticmethod
     def load(fname):
-        if hasattr(psrchive, "Archive_load"):
+        try:
             archive = psrchive.Archive_load(fname)
-        else:
-            try:
-                archive = psrchive.Archive.load(fname)
-            except AttributeError:
-                raise
-        # If neither of the above resolve, there is a 
-        # PSRCHIVE installation problem.
+        except AttributeError:
+            archive = psrchive.Archive.load(fname)
+	    # If neither of the above resolve, there is a
+	    # PSRCHIVE installation problem and we want to
+        # terminate execution anyway.
         
         return archive, DataCube.from_psrchive(archive)
 
