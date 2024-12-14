@@ -5,11 +5,11 @@ import os
 import clfd
 import clfd.interfaces
 
-log = logging.getLogger('clfd')
+log = logging.getLogger("clfd")
 
 
 def load_zapfile(fname):
-    """ Load zapfile into a list of channel indices. If 'fname' is None, return an empty list."""
+    """Load zapfile into a list of channel indices. If 'fname' is None, return an empty list."""
     if not fname:
         log.info("No zapfile specified.")
         return []
@@ -17,13 +17,23 @@ def load_zapfile(fname):
     log.debug("Loading zapfile: {}".format(fname))
     with open(fname, "r") as fobj:
         zap_channels = list(map(int, fobj.read().strip().split()))
-    log.debug("Ignoring {:d} channel indices: {!s}".format(
-        len(zap_channels), zap_channels))
+    log.debug("Ignoring {:d} channel indices: {!s}".format(len(zap_channels), zap_channels))
 
     return zap_channels
 
 
-def cleanup_file(fpath, interface, zap_channels, outdir=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
+def cleanup_file(
+    fpath,
+    interface,
+    zap_channels,
+    outdir=None,
+    features=("std", "ptp", "lfamp"),
+    qmask=2.0,
+    despike=False,
+    qspike=4.0,
+    ext="clfd",
+    report=True,
+):
     # 'fpath': full-length absolute file path
     # 'fname': file name without base directory
     fpath = os.path.realpath(fpath)
@@ -37,20 +47,22 @@ def cleanup_file(fpath, interface, zap_channels, outdir=None, features=('std', '
 
     # Profile masking
     features = clfd.featurize(cube, features=features)
-    stats, mask = clfd.profile_mask(
-        features, q=qmask, zap_channels=zap_channels)
+    stats, mask = clfd.profile_mask(features, q=qmask, zap_channels=zap_channels)
     interface.apply_profile_mask(mask, archive)
     msg = "{:s} profiles masked: {:d} / {:d} ({:.1%})".format(
-        fname, mask.sum(), mask.size, mask.sum() / float(mask.size))
+        fname, mask.sum(), mask.size, mask.sum() / float(mask.size)
+    )
     log.debug(msg)
 
     # Spike removal (optional)
     if despike:
         tpmask, valid_chans, repvals = clfd.time_phase_mask(
-            cube, q=qspike, zap_channels=zap_channels)
+            cube, q=qspike, zap_channels=zap_channels
+        )
         interface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
         msg = "{:s} time-phase bins masked: {:d} / {:d} ({:.1%})".format(
-            fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size))
+            fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size)
+        )
         log.debug(msg)
     else:
         # NOTE: we set those values to None to be passed as parameters to
@@ -62,7 +74,7 @@ def cleanup_file(fpath, interface, zap_channels, outdir=None, features=('std', '
     if outdir is None:
         outdir = fdir
     outpath = "{}.{}".format(os.path.join(outdir, fname), ext)
-    
+
     interface.save(outpath, archive)
     log.debug("Saved output archive: {:s}".format(outpath))
 
@@ -71,15 +83,28 @@ def cleanup_file(fpath, interface, zap_channels, outdir=None, features=('std', '
         report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
 
         frequencies = interface.get_frequencies(archive)
-        report = clfd.Report(features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike)
+        report = clfd.Report(
+            features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike
+        )
         report.save(report_path)
         log.debug("Saved report file: {:s}".format(report_path))
 
 
 class CleanupWorker(object):
-    """ Function-like object called by multiprocessing.Pool """
+    """Function-like object called by multiprocessing.Pool"""
 
-    def __init__(self, interface, zap_channels, outdir=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True):
+    def __init__(
+        self,
+        interface,
+        zap_channels,
+        outdir=None,
+        features=("std", "ptp", "lfamp"),
+        qmask=2.0,
+        despike=False,
+        qspike=4.0,
+        ext="clfd",
+        report=True,
+    ):
         self.interface = interface
         self.zap_channels = zap_channels
         self.outdir = outdir
@@ -92,29 +117,53 @@ class CleanupWorker(object):
 
     def __call__(self, fname):
         cleanup_file(
-            fname, self.interface, self.zap_channels,
+            fname,
+            self.interface,
+            self.zap_channels,
             outdir=self.outdir,
             features=self.features,
             qmask=self.qmask,
             despike=self.despike,
             qspike=self.qspike,
             ext=self.ext,
-            report=self.report)
+            report=self.report,
+        )
 
 
-def cleanup_main(filenames, fmt='psrchive', outdir=None, zapfile=None, features=('std', 'ptp', 'lfamp'), qmask=2.0, despike=False, qspike=4.0, ext='clfd', report=True, processes=1):
+def cleanup_main(
+    filenames,
+    fmt="psrchive",
+    outdir=None,
+    zapfile=None,
+    features=("std", "ptp", "lfamp"),
+    qmask=2.0,
+    despike=False,
+    qspike=4.0,
+    ext="clfd",
+    report=True,
+    processes=1,
+):
     log.debug("Files to process: {:d}".format(len(filenames)))
     log.debug("Format: {}".format(fmt))
     interface = clfd.interfaces.get_interface(fmt)
     zap_channels = load_zapfile(zapfile)
 
-    # outdir = None means that data products for each input file 
+    # outdir = None means that data products for each input file
     # are placed in the same directory as that file
     if outdir is not None:
         outdir = os.path.realpath(outdir)
 
-    worker_func = CleanupWorker(interface, zap_channels, outdir=outdir, features=features,
-                                qmask=qmask, despike=despike, qspike=qspike, ext=ext, report=report)
+    worker_func = CleanupWorker(
+        interface,
+        zap_channels,
+        outdir=outdir,
+        features=features,
+        qmask=qmask,
+        despike=despike,
+        qspike=qspike,
+        ext=ext,
+        report=report,
+    )
 
     if processes > 1:
         log.debug("Using multiprocessing with {:d} processes".format(processes))

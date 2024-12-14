@@ -9,10 +9,11 @@ except:
 
 
 class Interface(object):
-    """ Base class for an interface to some file format. """
+    """Base class for an interface to some file format."""
+
     @staticmethod
     def get_frequencies(archive):
-        """ Return channel frequencies in MHz, as a numpy array"""
+        """Return channel frequencies in MHz, as a numpy array"""
         raise NotImplementedError
 
     @staticmethod
@@ -33,10 +34,11 @@ class Interface(object):
 
 
 class PsrchiveInterface(Interface):
-    """ Interface to PSRCHIVE format. """
+    """Interface to PSRCHIVE format."""
+
     @staticmethod
     def apply_profile_mask(mask, archive):
-        """ Apply profile mask to folded archive produced with PSRCHIVE, setting
+        """Apply profile mask to folded archive produced with PSRCHIVE, setting
         the weights of masked profiles to zero.
 
         Parameters
@@ -54,7 +56,7 @@ class PsrchiveInterface(Interface):
 
     @staticmethod
     def apply_time_phase_mask(mask, valid_chans, repvals, archive):
-        """ Apply time-phase mask to folded archive produced with PSRCHIVE, setting
+        """Apply time-phase mask to folded archive produced with PSRCHIVE, setting
         the values of bad time-phase bins along the frequency dimension to appropriate
         replacement values. All arguments except the last are the output of the
         time_phase_mask() function.
@@ -69,7 +71,7 @@ class PsrchiveInterface(Interface):
             bad_bins = np.where(mask[isub])[0]
             if len(bad_bins):
                 repdict[isub] = bad_bins
-        
+
         for isub, bad_bins in repdict.items():
             for ichan in valid_chans:
                 # NOTE: cast indices from numpy.int64 to int, otherwise
@@ -79,16 +81,16 @@ class PsrchiveInterface(Interface):
 
     @staticmethod
     def get_frequencies(archive):
-        """ Return channel frequencies as a numpy array """
+        """Return channel frequencies as a numpy array"""
         # NOTE 14/02/2019: a recent (end of 2018 ?) psrchive version has a
         # get_frequencies() method to get the list of all channel freqs.
         # However, older ones don't, such as the 19/03/2018 version. Can't
         # find a trace of get_frequencies() in the docs anyway:
         # http://psrchive.sourceforge.net/classes/psrchive/classPulsar_1_1Archive.shtml
-        
+
         n = archive.get_nchan()
         # bw can be negative, which means that the first channel is the one
-        # with the top frequency 
+        # with the top frequency
         bw = archive.get_bandwidth()
         cw = bw / n
         fc = archive.get_centre_frequency()
@@ -104,10 +106,10 @@ class PsrchiveInterface(Interface):
             archive = psrchive.Archive_load(fname)
         except AttributeError:
             archive = psrchive.Archive.load(fname)
-	    # If neither of the above resolve, there is a
-	    # PSRCHIVE installation problem and we want to
+        # If neither of the above resolve, there is a
+        # PSRCHIVE installation problem and we want to
         # terminate execution anyway.
-        
+
         return archive, DataCube.from_psrchive(archive)
 
     @staticmethod
@@ -116,7 +118,7 @@ class PsrchiveInterface(Interface):
 
 
 def get_interface(fmt):
-    """ Get Interface class for given format name. """
+    """Get Interface class for given format name."""
     interfaces = {"psrchive": PsrchiveInterface}
     fmt = fmt.lower()
     if not fmt in interfaces:

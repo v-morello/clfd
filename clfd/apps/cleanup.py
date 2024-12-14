@@ -2,7 +2,7 @@
 # NOTE: this is the right shebang, compatible with virtual / conda environments
 # https://stackoverflow.com/questions/6908143/should-i-put-shebang-in-python-scripts-and-what-form-should-it-take
 
-# NOTE: This script cannot be named clfd.py, because that makes any statement 
+# NOTE: This script cannot be named clfd.py, because that makes any statement
 # 'import clfd.X' fail
 
 import argparse
@@ -18,19 +18,20 @@ log = logging.getLogger("clfd")
 help_formatter = lambda prog: argparse.ArgumentDefaultsHelpFormatter(prog, max_help_position=16)
 
 
-
 def parse_arguments():
     def outdir(path):
-        """ Function that checks the outdir argument """
+        """Function that checks the outdir argument"""
         if not os.path.isdir(path):
             msg = "Specified output directory {!r} does not exist".format(path)
             raise argparse.ArgumentTypeError(msg)
         return path
 
     parser = argparse.ArgumentParser(
-        formatter_class=help_formatter, #argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=help_formatter,  # argparse.ArgumentDefaultsHelpFormatter,
         description="Apply smart RFI cleaning algorithms to folded data archives. \
-        Version: {}".format(clfd.__version__)
+        Version: {}".format(
+            clfd.__version__
+        ),
     )
     parser.add_argument(
         "--fmt",
@@ -61,7 +62,7 @@ def parse_arguments():
         type=str,
         action="store",
         nargs="*",
-        default=["std","ptp","lfamp"],
+        default=["std", "ptp", "lfamp"],
         help="List of profile features to use for the profile masking algorithm, separated by spaces.",
     )
     parser.add_argument(
@@ -129,12 +130,12 @@ def main():
 
     # Format keyword arguments properly for the cleanup_main() function
     kw = dict(vars(args))
-    kw.pop('filenames')
+    kw.pop("filenames")
 
-    kw.pop('no_report')
-    kw['report'] = not args.no_report
+    kw.pop("no_report")
+    kw["report"] = not args.no_report
     cleanup_main(args.filenames, **kw)
 
-    
+
 if __name__ == "__main__":
     main()

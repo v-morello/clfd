@@ -4,4 +4,12 @@ from .core import DataCube, featurize, profile_mask, time_phase_mask
 from .report import Report
 from .tests import test
 
-__all__ = ['DataCube', 'featurize', 'profile_mask', 'time_phase_mask', 'Report', 'test', '__version__']
+__all__ = [
+    "DataCube",
+    "featurize",
+    "profile_mask",
+    "time_phase_mask",
+    "Report",
+    "test",
+    "__version__",
+]

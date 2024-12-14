@@ -12,12 +12,12 @@ except:
 
 
 class DataCube(object):
-    """ Wrapper for three-dimensional folded data. The data order is
-    (time, freq, phase) """
+    """Wrapper for three-dimensional folded data. The data order is
+    (time, freq, phase)"""
 
     def __init__(self, data, copy=False):
-        """ Create DataCube instance from numpy array. 
-        Classmethods are the preferred way of making a new DataCube instance. 
+        """Create DataCube instance from numpy array.
+        Classmethods are the preferred way of making a new DataCube instance.
 
         Parameters
         ----------
@@ -44,25 +44,25 @@ class DataCube(object):
         self._subtract_baseline()
 
     def _subtract_baseline(self):
-        """ Subtract from every profile its median value """
+        """Subtract from every profile its median value"""
         nsubs, nchans, nbins = self.data.shape
         self._baselines = np.median(self.data, axis=2)
         self._data -= self._baselines.reshape(nsubs, nchans, 1)
 
     @property
     def data(self):
-        """ 3D data """
+        """3D data"""
         return self._data
 
     @property
     def orig_data(self):
-        """ Original data, without baselines subtracted. """
+        """Original data, without baselines subtracted."""
         nsubs, nchans, nbins = self.data.shape
         return self.data + self.baselines.reshape(nsubs, nchans, 1)
 
     @property
     def baselines(self):
-        """ 2D array with shape (num_subints, num_chans) containing the baselines of all profiles. """
+        """2D array with shape (num_subints, num_chans) containing the baselines of all profiles."""
         return self._baselines
 
     @property
@@ -79,29 +79,29 @@ class DataCube(object):
 
     @property
     def subbands(self):
-        """ Sum of the data along the time axis. Output data order is (time, phase). """
+        """Sum of the data along the time axis. Output data order is (time, phase)."""
         return self.data.sum(axis=0)
 
     @property
     def subints(self):
-        """ Sum of the data along the frequency axis. Output data order is (freq, phase). """
+        """Sum of the data along the frequency axis. Output data order is (freq, phase)."""
         return self.data.sum(axis=1)
 
     def save_npy(self, fname, dtype=np.float32):
-        """ Save original 3D data to .npy file """
+        """Save original 3D data to .npy file"""
         nsubs, nchans, nbins = self.data.shape
         np.save(fname, self.orig_data.astype(dtype))
 
     @classmethod
     def from_npy(cls, fname):
-        """ Load numpy array saved as a .npy file. """
+        """Load numpy array saved as a .npy file."""
         data = np.load(fname)
         return cls(data)
 
     @classmethod
     def from_psrchive(cls, archive):
-        """ Create DataCube from PSRCHIVE Archive object. Only Stokes I data is read.
-        
+        """Create DataCube from PSRCHIVE Archive object. Only Stokes I data is read.
+
         Parameters
         ----------
         archive: str or psrchive.Archive
@@ -117,8 +117,8 @@ class DataCube(object):
                 archive = psrchive.Archive_load(archive)
             except AttributeError:
                 archive = psrchive.Archive.load(archive)
-	    # If neither of the above resolve, there is a
-	    # PSRCHIVE installation problem and we want to
+        # If neither of the above resolve, there is a
+        # PSRCHIVE installation problem and we want to
         # terminate execution anyway.
 
         # Extract Stokes I only
@@ -129,17 +129,15 @@ class DataCube(object):
 
     def __str__(self):
         return "{:s}(shape=({:d}, {:d}, {:d}))".format(
-            type(self).__name__,
-            self.num_subints,
-            self.num_chans,
-            self.num_bins)
+            type(self).__name__, self.num_subints, self.num_chans, self.num_bins
+        )
 
     def __repr__(self):
         return str(self)
 
 
 def featurize(cube, features=("std", "ptp", "lfamp")):
-    """ Compute specified set of features for every profile in the given DataCube.
+    """Compute specified set of features for every profile in the given DataCube.
 
     Parameters
     ----------
@@ -147,7 +145,7 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
         The data cube to featurize.
     features: list or tuple of strings
         List of features to compute. These must name functions in the 'clfd.features' submodule.
-    
+
     Returns
     -------
     features: pandas.DataFrame
@@ -161,7 +159,7 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
     >>> table = featurize(cube, features=('std', 'ptp', 'lfamp'))
     >>> print(table)
                          std       ptp     lfamp
-    subint channel                              
+    subint channel
     0      0        0.030225  0.139496  0.050769
            1        0.029482  0.156823  0.413427
            2        0.026617  0.134454  0.312459
@@ -173,7 +171,7 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
 
     >>> table.loc[3,15:19, :]
                          std       ptp     lfamp
-    subint channel                              
+    subint channel
     3      15       0.022803  0.112603  0.245692
            16       0.020720  0.121008  0.195285
 
@@ -197,7 +195,7 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
 
 
 def feature_stats(features, q=2.0):
-    """ Compute quartiles, inter-quartile range and min/max acceptable values for every
+    """Compute quartiles, inter-quartile range and min/max acceptable values for every
     column in 'features' based on Tukey's rule for outliers.
 
     Parameters
@@ -218,7 +216,7 @@ def feature_stats(features, q=2.0):
     Returns
     -------
     stats: pandas.DataFrame
-        DataFrame containing the results. Columns are individual features, and rows are 
+        DataFrame containing the results. Columns are individual features, and rows are
         individual statistics (quartiles, iqr, min and max values).
 
     Examples
@@ -242,7 +240,7 @@ def feature_stats(features, q=2.0):
 
 
 def profile_mask(features, q=2.0, zap_channels=[]):
-    """ Compute profile mask, flagging outliers.
+    """Compute profile mask, flagging outliers.
 
     Parameters
     ----------
@@ -266,7 +264,7 @@ def profile_mask(features, q=2.0, zap_channels=[]):
     Returns
     -------
     stats: pandas.DataFrame
-        DataFrame containing the results. Columns are individual features, and rows are 
+        DataFrame containing the results. Columns are individual features, and rows are
         individual statistics (quartiles, iqr, min and max values).
     mask: ndarray
         A two dimensional boolean numpy array, with shape (num_subints, num_channels).
@@ -293,12 +291,12 @@ def profile_mask(features, q=2.0, zap_channels=[]):
 
     # Forcibly mask zapped channels
     if do_zap:
-	    mask[:, zap_channels] = True
+        mask[:, zap_channels] = True
     return stats, mask
 
 
 def time_phase_mask(cube, q=4.0, zap_channels=[]):
-    """ Compute a data mask based on the cube's time-phase plot (sum of the
+    """Compute a data mask based on the cube's time-phase plot (sum of the
     data along the frequency axis of the cube).
 
     Parameters
@@ -306,7 +304,7 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
     cube: DataCube
     q: float, optional (default: 4.0)
         Parameter that controls the min and max values that define the 'inlier' or
-        'normality' range. 
+        'normality' range.
     zap_channels: list or array of ints, optional (default: [])
         Frequency channel indices to exclude from the outlier analysis.
 
@@ -319,9 +317,9 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
         List of channel indices that are not part of 'zap_channels'. In these
         valid channels, bad data values are allowed to be replaced.
     repvals: ndarray
-        Three dimensional array with same shape as the input data cube, containing 
+        Three dimensional array with same shape as the input data cube, containing
         the appropriate replacement values for bad data points in the original archive.
-        A bad time-phase bin with indices (i, j) means that 
+        A bad time-phase bin with indices (i, j) means that
         orig_data[i, valid_chans, j] should be replaced by repvals[i, valid_chans, j].
     """
     valid_chans_mask = np.ones(cube.num_chans, dtype=bool)
@@ -331,7 +329,7 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
     valid_chans = np.where(valid_chans_mask)[0]
 
     data = cube.data[:, valid_chans].sum(axis=1)
-    pcts = np.percentile(data, [25, 50, 75], axis=0) # Q1, median, Q3 along time axis
+    pcts = np.percentile(data, [25, 50, 75], axis=0)  # Q1, median, Q3 along time axis
     stats = pandas.DataFrame(pcts).rename({0: "q1", 1: "med", 2: "q3"})
     stats.loc["iqr"] = stats.loc["q3"] - stats.loc["q1"]
     stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
@@ -343,4 +341,3 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
     # NOTE: Don't forget to offset replacement values by profile baselines
     repvals = stats.loc["med"].values / num_valid_chans + cube.baselines.reshape(nsubs, nchans, 1)
     return mask, valid_chans, repvals
-

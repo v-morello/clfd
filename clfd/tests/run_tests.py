@@ -3,7 +3,7 @@ import unittest
 
 
 def test():
-    """ Run all unit tests """
+    """Run all unit tests"""
     loader = unittest.TestLoader()
     # NOTE: assume that all unit tests are to be found in the same directory
     # as this file

@@ -4,7 +4,7 @@ import os
 
 def get_example_data_path():
     cdir, __ = os.path.split(__file__)
-    return os.path.realpath(os.path.join(cdir, '..', 'example_data'))
+    return os.path.realpath(os.path.join(cdir, "..", "example_data"))
 
 
 def has_module_available(module_name: str) -> bool:
@@ -13,6 +13,7 @@ def has_module_available(module_name: str) -> bool:
         return True
     except ImportError:
         return False
+
 
 HAS_PSRCHIVE = has_module_available("psrchive")
 HAS_MATPLOTLIB = has_module_available("matplotlib.pyplot")

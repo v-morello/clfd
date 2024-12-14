@@ -9,7 +9,8 @@ from clfd.tests.utils import HAS_PSRCHIVE, get_example_data_path
 
 
 class TestDataCube(unittest.TestCase):
-    """ Check the DataCube class methods. """
+    """Check the DataCube class methods."""
+
     def setUp(self):
         self.npy_data_fname = os.path.join(get_example_data_path(), "npy_example.npy")
         self.psrchive_data_fname = os.path.join(get_example_data_path(), "psrchive_example.ar")
@@ -43,9 +44,9 @@ class TestDataCube(unittest.TestCase):
             clfd.DataCube(self.ndarray[:1, :1, :])
 
     def test_load_save_npy(self):
-        with tempfile.NamedTemporaryFile(mode="wb", suffix='.npy') as fobj:
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".npy") as fobj:
             fname = fobj.name
-        
+
             # NOTE: leaving self.ndarray untouched
             cube1 = clfd.DataCube(self.ndarray, copy=True)
             cube1.save_npy(fname)

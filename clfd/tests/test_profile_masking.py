@@ -15,7 +15,7 @@ def load_test_datacube():
 
 
 def load_features():
-    """ Returns a list of tuples (feature_name, featurizer_function) """
+    """Returns a list of tuples (feature_name, featurizer_function)"""
     return inspect.getmembers(clfd.features, inspect.isfunction)
 
 
@@ -38,8 +38,8 @@ class TestFeaturize(unittest.TestCase):
 
     def test_featurize(self):
         for n in range(self.num_features):
-            data = clfd.featurize(self.cube, features=self.feature_names[:n+1])
-    
+            data = clfd.featurize(self.cube, features=self.feature_names[: n + 1])
+
 
 class TestProfileMask(unittest.TestCase):
     def setUp(self):
@@ -57,10 +57,6 @@ class TestProfileMask(unittest.TestCase):
         zap_channels = numpy.arange(0, self.cube.num_chans, 2)
         stats, mask = clfd.profile_mask(data, zap_channels=zap_channels, q=1000.0)
         self.assertTrue(numpy.all(mask[:, zap_channels]))
-
-
-
-
 
 
 if __name__ == "__main__":
