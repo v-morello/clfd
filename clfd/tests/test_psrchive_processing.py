@@ -1,12 +1,12 @@
-import unittest
 import os
 import tempfile
+import unittest
 
 import numpy
-from clfd import DataCube, profile_mask, featurize, time_phase_mask
-from clfd.interfaces import PsrchiveInterface
 
-from utils import get_example_data_path
+from clfd import DataCube, featurize, profile_mask, time_phase_mask
+from clfd.interfaces import PsrchiveInterface
+from clfd.tests.utils import get_example_data_path
 
 try:
     import psrchive

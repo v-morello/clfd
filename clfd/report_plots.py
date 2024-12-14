@@ -1,6 +1,6 @@
-import os
-import itertools
 import logging
+import os
+
 import numpy as np
 
 try:

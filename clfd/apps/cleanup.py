@@ -5,10 +5,8 @@
 # NOTE: This script cannot be named clfd.py, because that makes any statement 
 # 'import clfd.X' fail
 
-import sys
 import argparse
 import logging
-import json
 import os
 
 import clfd

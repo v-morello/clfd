@@ -1,10 +1,11 @@
-import unittest
 import os
 import tempfile
-import numpy
-import clfd
+import unittest
 
-from utils import get_example_data_path
+import numpy
+
+import clfd
+from clfd.tests.utils import get_example_data_path
 
 try:
     import psrchive

@@ -1,4 +1,5 @@
 import numpy as np
+
 from clfd import DataCube
 
 try:

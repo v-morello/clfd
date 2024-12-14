@@ -1,6 +1,6 @@
-import os
 import logging
 import multiprocessing
+import os
 
 import clfd
 import clfd.interfaces

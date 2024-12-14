@@ -2,6 +2,7 @@ from collections import OrderedDict
 
 import numpy as np
 import pandas
+
 import clfd.features as pf
 
 try:

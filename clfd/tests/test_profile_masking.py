@@ -1,12 +1,13 @@
-import unittest
-import os
 import inspect
-import tempfile
+import os
+import unittest
+
 import numpy
+
 import clfd
 import clfd.features
+from clfd.tests.utils import get_example_data_path
 
-from utils import get_example_data_path
 
 def load_test_datacube():
     fname = os.path.join(get_example_data_path(), "npy_example.npy")

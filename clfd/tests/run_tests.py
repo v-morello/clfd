@@ -1,5 +1,6 @@
-import unittest
 import os
+import unittest
+
 
 def test():
     """ Run all unit tests """

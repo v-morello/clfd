@@ -1,5 +1,6 @@
-import pandas
 import numpy as np
+import pandas
+
 from clfd import __version__
 
 # pytables to save / load reports
@@ -9,7 +10,7 @@ try:
 except:
     HAS_PYTABLES = False
 
-from clfd.report_plots import profile_mask_plot, CornerPlot
+from clfd.report_plots import CornerPlot, profile_mask_plot
 
 
 def _check_hdf5_libs():
