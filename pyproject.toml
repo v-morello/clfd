@@ -1,0 +1,43 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = [
+  "setuptools>=42",
+]
+
+[project]
+authors = [
+  {name = "Vincent Morello", email = "vmorello@gmail.com"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: Unix",
+  "Topic :: Scientific/Engineering :: Astronomy",
+]
+description = "Smart RFI removal algorithms to be used on folded pulsar search and timing data"
+license = {text = "MIT License"}
+name = "clfd"
+readme = "README.md"
+requires-python = ">=3.8"
+version = "0.3.3"
+
+dependencies = [
+  "numpy<2.0.0",
+  "pandas",
+  "tables",
+  "scipy",
+  "matplotlib",
+]
+
+[project.scripts]
+clfd = "clfd.apps.cleanup:main"
+
+[project.urls]
+homepage = "https://github.com/v-morello/clfd"
+
+[tool.black]
+line-length = 79
