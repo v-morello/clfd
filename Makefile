@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 PKG = clfd
 PKG_DIR = clfd
+LINE_LENGTH = 100
 TESTS_DIR = ${PKG_DIR}/tests
 
 # NOTE: -e installs in "Development Mode"
@@ -38,6 +39,15 @@ upload_test: ## Upload the distribution source to the TEST PyPI
 
 upload: ## Upload the distribution source to the REAL PyPI
 	twine upload dist/*
+
+lint: ## Run linting
+	isort --check-only --profile black --line-length ${LINE_LENGTH}  ${PKG_DIR}/
+	flake8 --show-source --statistics --max-line-length ${LINE_LENGTH}  ${PKG_DIR}/
+	black --exclude .+\.ipynb --check --line-length ${LINE_LENGTH}  ${PKG_DIR}/
+
+format: ## Apply automatic formatting
+	black --exclude .+\.ipynb --line-length ${LINE_LENGTH} ${PKG_DIR}/
+	isort --profile black --line-length ${LINE_LENGTH} ${PKG_DIR}/
 
 tests: ## Run unit tests
 	python -m unittest discover ${TESTS_DIR}
