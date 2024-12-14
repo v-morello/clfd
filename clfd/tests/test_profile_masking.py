@@ -38,7 +38,7 @@ class TestFeaturize(unittest.TestCase):
 
     def test_featurize(self):
         for n in range(self.num_features):
-            data = clfd.featurize(self.cube, features=self.feature_names[: n + 1])
+            clfd.featurize(self.cube, features=self.feature_names[: n + 1])
 
 
 class TestProfileMask(unittest.TestCase):
@@ -50,12 +50,12 @@ class TestProfileMask(unittest.TestCase):
         data = clfd.featurize(self.cube, features=self.feature_names)
 
         # Without specifying zapped channels
-        stats, mask = clfd.profile_mask(data, zap_channels=[])
+        __, mask = clfd.profile_mask(data, zap_channels=[])
 
         # With specifying zapped channels
         # Ensure that those zapped channels are indeed masked in the output mask
         zap_channels = numpy.arange(0, self.cube.num_chans, 2)
-        stats, mask = clfd.profile_mask(data, zap_channels=zap_channels, q=1000.0)
+        __, mask = clfd.profile_mask(data, zap_channels=zap_channels, q=1000.0)
         self.assertTrue(numpy.all(mask[:, zap_channels]))
 
 

@@ -7,7 +7,7 @@ import clfd.features as pf
 
 try:
     import psrchive
-except:
+except ImportError:
     pass
 
 
@@ -27,7 +27,7 @@ class DataCube(object):
             If True, copy the input data. Otherwise the DataCube stores only a
             reference to 'data' to save memory (default: False)
         """
-        if not type(data) == np.ndarray:
+        if not isinstance(data, np.ndarray):
             raise ValueError("data must be a numpy array")
         if not len(data.shape) == 3:
             raise ValueError("data must be 3-dimensional")
@@ -112,7 +112,7 @@ class DataCube(object):
         cube: DataCube
             DataCube instance wrapping Stokes I data.
         """
-        if type(archive) == str:
+        if isinstance(archive, str):
             try:
                 archive = psrchive.Archive_load(archive)
             except AttributeError:

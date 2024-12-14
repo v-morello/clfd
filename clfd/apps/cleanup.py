@@ -15,8 +15,6 @@ from clfd.apps import cleanup_main
 
 log = logging.getLogger("clfd")
 
-help_formatter = lambda prog: argparse.ArgumentDefaultsHelpFormatter(prog, max_help_position=16)
-
 
 def parse_arguments():
     def outdir(path):
@@ -27,7 +25,7 @@ def parse_arguments():
         return path
 
     parser = argparse.ArgumentParser(
-        formatter_class=help_formatter,  # argparse.ArgumentDefaultsHelpFormatter,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description="Apply smart RFI cleaning algorithms to folded data archives. \
         Version: {}".format(
             clfd.__version__
@@ -63,26 +61,28 @@ def parse_arguments():
         action="store",
         nargs="*",
         default=["std", "ptp", "lfamp"],
-        help="List of profile features to use for the profile masking algorithm, separated by spaces.",
+        help="List of profile features to use for the profile masking algorithm, separated by \
+        spaces.",
     )
     parser.add_argument(
         "--qmask",
         type=float,
         default=2.0,
-        help="Tukey's rule parameter for the profile masking algorithm. This parameter is the number of \
-        inter-quartile ranges that define the inlier range of a distribution.",
+        help="Tukey's rule parameter for the profile masking algorithm. This parameter is the \
+        number of inter-quartile ranges that define the inlier range of a distribution.",
     )
     parser.add_argument(
         "--despike",
         action="store_true",
         default=False,
-        help="Apply the zero DM spike removal algorithm, i.e. find outliers in the zero DM time-phase plot \
-        and replace them by appropriate values (inferred from the data itself) across the frequency dimension. \
+        help="Apply the zero DM spike removal algorithm, i.e. find outliers in the zero DM \
+        time-phase plot and replace them by appropriate values (inferred from the data itself) \
+        across the frequency dimension. \
         Note that any channels specified by the optional zapfile are excluded from the analysis \
         and left untouched. \
-        WARNING: may negatively affect very bright individual pulses from a low-DM pulsar. Can also fail \
-        in particularly bad RFI environments. In doubt, avoid using this option and if you do, check the \
-        output carefully.",
+        WARNING: may negatively affect very bright individual pulses from a low-DM pulsar. \
+        Can also fail in particularly bad RFI environments. In doubt, avoid using this option \
+        and if you do, check the output carefully.",
     )
     parser.add_argument(
         "--qspike",

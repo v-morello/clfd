@@ -49,6 +49,8 @@ class TestReport(unittest.TestCase):
 
     @unittest.skipUnless(HAS_MATPLOTLIB, "")
     def test_save_corner_plot(self):
+        import matplotlib.pyplot as plt
+
         report = self.get_report()
         with tempfile.NamedTemporaryFile(mode="wb", suffix=".png") as fobj:
             fname = fobj.name
@@ -57,6 +59,8 @@ class TestReport(unittest.TestCase):
 
     @unittest.skipUnless(HAS_MATPLOTLIB, "")
     def test_save_profile_mask_plot(self):
+        import matplotlib.pyplot as plt
+
         report = self.get_report()
         with tempfile.NamedTemporaryFile(mode="wb", suffix=".png", delete=False) as fobj:
             fname = fobj.name

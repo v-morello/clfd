@@ -56,7 +56,7 @@ class TestDataCube(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PSRCHIVE, "psrchive python bindings must be installed")
     def test_load_psrchive(self):
-        cube = clfd.DataCube.from_psrchive(self.psrchive_data_fname)
+        clfd.DataCube.from_psrchive(self.psrchive_data_fname)
 
 
 if __name__ == "__main__":

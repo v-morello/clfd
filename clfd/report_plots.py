@@ -8,16 +8,11 @@ try:
     from matplotlib.gridspec import GridSpec
 
     HAS_MATPLOTLIB = True
-except:
+except ImportError:
     HAS_MATPLOTLIB = False
 
 
 log = logging.getLogger("clfd")
-
-
-def _check_matplotlib():
-    if not HAS_MATPLOTLIB:
-        raise ImportError("matplotlib library not available")
 
 
 class CornerPlot(object):
@@ -135,7 +130,7 @@ def profile_mask_plot(report, figsize=(12, 4), dpi=100):
 
     nsub, nchan = report.profmask.shape
 
-    ### Profile mask
+    # Profile mask
     ax_mask = plt.subplot(gs[0, 0])
     # NOTE: origin set to lower. Makes life easier when plotting fraction
     # masked graphs below
@@ -149,7 +144,7 @@ def profile_mask_plot(report, figsize=(12, 4), dpi=100):
     else:
         ax_mask.set_title("Profile mask")
 
-    ### Fraction masked in each channel
+    # Fraction masked in each channel
     ax_fchan = plt.subplot(gs[1, 0], sharex=ax_mask)
     fchan = report.profmask.mean(axis=0)
     ax_fchan.plot(fchan * 100.0, color=linecolor)
@@ -162,7 +157,7 @@ def profile_mask_plot(report, figsize=(12, 4), dpi=100):
     ax_fchan.set_xlabel("Channel index")
     ax_fchan.grid(linestyle=":")
 
-    ### Fraction masked in each subint
+    # Fraction masked in each subint
     ax_fsub = plt.subplot(gs[0, 1], sharey=ax_mask)
     fsub = report.profmask.mean(axis=1)
     ax_fsub.plot(fsub * 100.0, range(nsub), color=linecolor)

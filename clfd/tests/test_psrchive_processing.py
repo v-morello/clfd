@@ -24,7 +24,7 @@ class TestPsrchiveProcessing(unittest.TestCase):
     @unittest.skipUnless(HAS_PSRCHIVE, "")
     def test_get_frequencies(self):
         """Check that the get_frequencies() method works as expected"""
-        archive, cube = PsrchiveInterface.load(self.psrchive_data_fname)
+        archive, __ = PsrchiveInterface.load(self.psrchive_data_fname)
         freqs = PsrchiveInterface.get_frequencies(archive)
         self.assertTrue(numpy.allclose(freqs, self.frequencies))
 
@@ -36,7 +36,7 @@ class TestPsrchiveProcessing(unittest.TestCase):
             fname = fobj.name
         PsrchiveInterface.save(fname, archive)
 
-        archive2, cube2 = PsrchiveInterface.load(fname)
+        __, cube2 = PsrchiveInterface.load(fname)
 
         # In PSRFITS the data are stored as 16-bit integers
         # with a separate offset and scale parameter for each profile
@@ -63,7 +63,7 @@ class TestPsrchiveProcessing(unittest.TestCase):
         mask, valid_chans, repvals = time_phase_mask(cube, q=q, zap_channels=zap_channels)
         PsrchiveInterface.apply_time_phase_mask(mask, valid_chans, repvals, archive)
 
-        ##### Check replacement of values behaves as expected #####
+        # Check replacement of values behaves as expected
         # Once bad values have been replaced, if we call time_phase_mask() again
         # with the same params, then no previously flagged time-phase bins should be
         # flagged again.

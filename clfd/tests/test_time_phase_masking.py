@@ -47,7 +47,7 @@ class TestTimePhaseMask(unittest.TestCase):
         self.assertEqual(mask.shape, (self.cube.num_subints, self.cube.num_bins))
         self.assertEqual(repvals.shape, self.cube.data.shape)
 
-        ##### Check replacement of values behaves as expected #####
+        # Check replacement of values behaves as expected
         # Once bad values have been replaced, if we call time_phase_mask() again
         # with the same params, then no previously flagged time-phase bins should be
         # flagged again.

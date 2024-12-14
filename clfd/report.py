@@ -8,7 +8,7 @@ try:
     import tables
 
     HAS_PYTABLES = True
-except:
+except ImportError:
     HAS_PYTABLES = False
 
 from clfd.report_plots import CornerPlot, profile_mask_plot

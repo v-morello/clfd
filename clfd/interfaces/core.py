@@ -4,7 +4,7 @@ from clfd import DataCube
 
 try:
     import psrchive
-except:
+except ImportError:
     pass
 
 
@@ -121,7 +121,7 @@ def get_interface(fmt):
     """Get Interface class for given format name."""
     interfaces = {"psrchive": PsrchiveInterface}
     fmt = fmt.lower()
-    if not fmt in interfaces:
+    if fmt not in interfaces:
         msg = "No interface for format: {:s}".format(fmt)
         raise ValueError(msg)
     return interfaces[fmt]
