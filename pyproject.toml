@@ -9,7 +9,6 @@ requires = [
 authors = [
   {name = "Vincent Morello", email = "vmorello@gmail.com"},
 ]
-dynamic = ["version"]
 classifiers = [
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
@@ -21,6 +20,7 @@ classifiers = [
   "Topic :: Scientific/Engineering :: Astronomy",
 ]
 description = "Smart RFI removal algorithms to be used on folded pulsar search and timing data"
+dynamic = ["version"]
 license = {text = "MIT License"}
 name = "clfd"
 readme = "README.md"
@@ -32,6 +32,13 @@ dependencies = [
   "tables",
   "scipy",
   "matplotlib",
+]
+
+[project.optional-dependencies]
+dev = [
+  "isort",
+  "flake8",
+  "black",
 ]
 
 [project.scripts]
