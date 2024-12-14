@@ -5,19 +5,7 @@ import unittest
 import numpy
 
 import clfd
-from clfd.tests.utils import get_example_data_path
-
-try:
-    import tables
-    HAS_PYTABLES = True
-except ImportError:
-    HAS_PYTABLES = False
-
-try:
-    import matplotlib.pyplot as plt
-    HAS_MATPLOTLIB = True
-except:
-    HAS_MATPLOTLIB = False
+from clfd.tests.utils import HAS_MATPLOTLIB, HAS_PYTABLES, get_example_data_path
 
 
 class TestReport(unittest.TestCase):

@@ -5,13 +5,7 @@ import unittest
 import numpy
 
 import clfd
-from clfd.tests.utils import get_example_data_path
-
-try:
-    import psrchive
-    HAS_PSRCHIVE = True
-except ImportError:
-    HAS_PSRCHIVE = False
+from clfd.tests.utils import HAS_PSRCHIVE, get_example_data_path
 
 
 class TestDataCube(unittest.TestCase):

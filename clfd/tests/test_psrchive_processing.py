@@ -6,13 +6,7 @@ import numpy
 
 from clfd import DataCube, featurize, profile_mask, time_phase_mask
 from clfd.interfaces import PsrchiveInterface
-from clfd.tests.utils import get_example_data_path
-
-try:
-    import psrchive
-    HAS_PSRCHIVE = True
-except ImportError:
-    HAS_PSRCHIVE = False
+from clfd.tests.utils import HAS_PSRCHIVE, get_example_data_path
 
 
 class TestPsrchiveProcessing(unittest.TestCase):
