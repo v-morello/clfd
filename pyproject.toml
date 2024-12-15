@@ -39,6 +39,7 @@ dev = [
   "isort",
   "flake8",
   "black",
+  "pytest",
 ]
 
 [project.scripts]
@@ -53,4 +54,4 @@ packages = ["clfd"]
 [tool.setuptools_scm]
 
 [tool.black]
-line-length = 79
+line-length = 100
