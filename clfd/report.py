@@ -219,17 +219,17 @@ class Report(object):
             # DO NOT USE append=True ! This creates a weird IOError when
             # loading reports with pandas <= 0.23. Opening the HDFStore
             # with mode='a' seems good enough already.
-            self.features.to_hdf(store, "features")
-            self.stats.to_hdf(store, "stats")
+            self.features.to_hdf(store, key="features")
+            self.stats.to_hdf(store, key="stats")
 
             # NOTE: convert numpy arrays to pandas.DataFrames for storage
             # We convert back to numpy arrays when loading
-            pandas.DataFrame(self.profmask).to_hdf(store, "profmask")
-            pandas.DataFrame(self.frequencies).to_hdf(store, "frequencies")
-            pandas.DataFrame(self.zap_channels).to_hdf(store, "zap_channels")
+            pandas.DataFrame(self.profmask).to_hdf(store, key="profmask")
+            pandas.DataFrame(self.frequencies).to_hdf(store, key="frequencies")
+            pandas.DataFrame(self.zap_channels).to_hdf(store, key="zap_channels")
 
             if self.tpmask is not None:
-                pandas.DataFrame(self.tpmask).to_hdf(store, "tpmask")
+                pandas.DataFrame(self.tpmask).to_hdf(store, key="tpmask")
 
     @classmethod
     def load(cls, fname):
@@ -244,26 +244,26 @@ class Report(object):
             qspike = items["qspike"]
 
         with pandas.HDFStore(fname, mode="r") as store:
-            features = pandas.read_hdf(store, "features")
-            stats = pandas.read_hdf(store, "stats")
+            features = pandas.read_hdf(store, key="features")
+            stats = pandas.read_hdf(store, key="stats")
 
             # The remaining attributes are numpy arrays, hence the .values
-            profmask = pandas.read_hdf(store, "profmask").values
+            profmask = pandas.read_hdf(store, key="profmask").values
 
             # NOTE: .ravel() must be called because DataFrames store
             # flat arrays as a column, i.e. shape = (N, 1)
-            frequencies = pandas.read_hdf(store, "frequencies").values.ravel()
+            frequencies = pandas.read_hdf(store, key="frequencies").values.ravel()
 
             # NOTE: it looks like pandas.to_hdf simply does not write out
             # empty arrays, hence these try blocks below
             try:
                 # call .ravel() here as well to get a 1D array
-                zap_channels = pandas.read_hdf(store, "zap_channels").values.ravel()
+                zap_channels = pandas.read_hdf(store, key="zap_channels").values.ravel()
             except KeyError:
                 zap_channels = np.asarray([], dtype=int)
 
             try:
-                tpmask = pandas.read_hdf(store, "tpmask").values
+                tpmask = pandas.read_hdf(store, key="tpmask").values
             except KeyError:
                 tpmask = None
 
