@@ -47,6 +47,9 @@ clfd = "clfd.apps.cleanup:main"
 [project.urls]
 homepage = "https://github.com/v-morello/clfd"
 
+[tool.setuptools]
+packages = ["clfd"]
+
 [tool.setuptools_scm]
 
 [tool.black]
