@@ -2,7 +2,7 @@
 PKG = clfd
 PKG_DIR = clfd
 LINE_LENGTH = 100
-TESTS_DIR = ${PKG_DIR}/tests
+TESTS_DIR = tests/
 
 # NOTE: -e installs in "Development Mode"
 # See: https://packaging.python.org/tutorials/installing-packages/
@@ -50,6 +50,6 @@ format: ## Apply automatic formatting
 	isort --profile black --line-length ${LINE_LENGTH} ${PKG_DIR}/
 
 tests: ## Run unit tests
-	python -m unittest discover ${TESTS_DIR}
+	pytest -vv ${TESTS_DIR}
 
 .PHONY: dist install uninstall help clean tests

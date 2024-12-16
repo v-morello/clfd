@@ -46,28 +46,14 @@ There are three main choices here, given in decreasing order of recommendation.
 
 #### Installing with pip
 
-The easiest method is to use pip install, which pulls the latest release from the python package index and installs all missing dependencies:
+The easiest method is to use pip install, which pulls the latest release from the python package index and installs all dependencies:
 ```
 pip install clfd
 ```
 
-Once installed, import the module and run the unit tests:
+The main command-line application of should now be available:
 ```
-In [1]: import clfd
-
-In [2]: clfd.test()
-.................
-----------------------------------------------------------------------
-Ran 17 tests in 1.261s
-
-OK
-```
-Note that if the PSRCHIVE python bindings cannot be imported, then all PSRCHIVE-related tests will be skipped, which will visible in the output above. Tests related to saving / loading reports will also be skipped if ``pytables`` is not available.
-
-
-Finally, check that the main command-line application of `clfd` has been placed in your `PATH`:
-```
-clfd -h
+clfd --help
 ```
 And you should see the full help of the application, see next section for more details.
 
@@ -80,7 +66,7 @@ Alternatively, you can clone the repository and in the base directory of `clfd` 
 make install
 ```
 
-This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs), which means you can freely edit the code. It also installs all required dependencies with ``pip``.
+This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs) with extra development dependencies, which means you can freely edit the code.
 
 
 #### The PYTHONPATH method

@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from clfd.tests.utils import HAS_PSRCHIVE
+from .utils import HAS_PSRCHIVE
 
 
 def test_cli_app_entrypoint_exists():

@@ -5,7 +5,7 @@ import numpy
 
 import clfd
 import clfd.features
-from clfd.tests.utils import get_example_data_path
+from .utils import get_example_data_path
 
 
 def load_test_datacube():
