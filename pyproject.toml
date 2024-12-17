@@ -40,6 +40,8 @@ dev = [
   "flake8",
   "black",
   "pytest",
+  "build",
+  "twine",
 ]
 
 [project.scripts]
@@ -48,8 +50,9 @@ clfd = "clfd.apps.cleanup:main"
 [project.urls]
 homepage = "https://github.com/v-morello/clfd"
 
-[tool.setuptools]
-packages = ["clfd"]
+[tool.setuptools.packages.find]
+where = [""]
+include = ["clfd"]
 
 [tool.setuptools_scm]
 

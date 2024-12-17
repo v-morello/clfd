@@ -1,6 +1,7 @@
-global-include *.py 
-global-include *.md
+global-exclude *
+global-include *.py
+exclude tests/*
 include LICENSE
-include Makefile
-include clfd/example_data/*
-prune .vscode
+include pyproject.toml
+include README.md
+include CHANGELOG.md

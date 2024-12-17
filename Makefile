@@ -4,14 +4,11 @@ PKG_DIR = clfd
 LINE_LENGTH = 100
 TESTS_DIR = tests/
 
-# NOTE: -e installs in "Development Mode"
-# See: https://packaging.python.org/tutorials/installing-packages/
-
 dist: clean ## Build source distributions
-	python setup.py sdist
+	python -m build --sdist
 
-install: ## Install the package
-	pip install -e .
+install: ## Install the package in development mode
+	pip install -e .[dev]
 
 # NOTE: remove the .egg-info directory
 uninstall: ## Uninstall the package
