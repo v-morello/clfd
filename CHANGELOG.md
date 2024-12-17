@@ -2,6 +2,25 @@
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 0.4.0 - 2024-12-17
+
+This new version fixes an issue caused by a change in PSRCHIVE Python API, and starts a much needed modernisation effort of `clfd`. **We are dropping support for Python 2.x from this point.**
+
+### Fixed
+
+- Fixed a problem with recent PSRCHIVE versions where the Python API for loading archives has changed. Thanks to Bradley Meyers for discovering and fixing the issue [(#3)](https://github.com/v-morello/clfd/issues/3)
+- Fixed a warning from the `pandas` library about future changes to its HDF5 API.
+
+### Changed
+
+- PEP 517/518 compliant packaging, i.e. no more `setup.py`.
+
+### Removed
+
+- Support for Python 2.x
+- Removed function `clfd.test()`. Tests are not shipped with the module anymore.
+
+
 ## 0.3.3 - 2021-04-27
 ### Added
 - New features: skewness, excess kurtosis, autocorrelation. These are not sensitive to the scale of the data, and should perform better on high bit depth data (8-bit and more).

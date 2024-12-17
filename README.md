@@ -2,7 +2,7 @@
 
 # clfd
 
-``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed. 
+``clfd`` stands for **cl**ean **f**olded **d**ata, and implements smart interference removal algorithms to be used on _folded_ pulsar search and pulsar timing data. They are based on a simple outlier detection method and require very little to no human input, which is the main reason for their efficacy. These cleaning algorithms were initially developed for a complete re-processing of the High Time Resolution Universe (HTRU) survey, and can be credited with the discovery of several pulsars that would have otherwise been missed.
 
 ## Citation
 
@@ -19,64 +19,47 @@ A detailed explanation of ``clfd``'s algorithms and a visual demonstration of wh
 
 The implementation of the cleaning algorithms is entirely decoupled from the input/output data format, and interfaces to any folded data format can be easily implemented. Currently, ``clfd`` can read and write PSRFITS archives via the python bindings of [PSRCHIVE](http://psrchive.sourceforge.net/). An interface to [PRESTO](https://www.cv.nrao.edu/~sransom/presto/)'s pfd archives can be added if there are any expressions of interest.
 
-## Python version
 
-The core of ``clfd`` is fully compatible with both python 2.7 and python 3, but you will have to use whichever python version that your [PSRCHIVE](http://psrchive.sourceforge.net/) python bindings require. Recent (2019+) installations of psrchive may require python3, while older ones are only compatible with python2. Keep that in mind if you are planning to install ``clfd`` in a virtual environment with [conda](https://conda.io/docs/user-guide/tasks/manage-environments.html) or any similar alternative.
+## Extra dependencies
 
+`clfd` has little reason to exist without the [PSRCHIVE](http://psrchive.sourceforge.net/) python bindings, which it uses to read and write archives. Unless you are working on an HPC facility where someone has already done the job for you, you will have to build PSRCHIVE yourself, with Python support.
 
-## Dependencies
-
-Strict dependencies:  
-
-- ``numpy``
-- ``pandas``
-- ``scipy``
-
-Optional but recommended:  
-
-- ``pytables``: to save and load cleaning reports in HDF5 format
-- ``matplotlib``: to plot cleaning reports in particular
+We hope to provide a guide on how to do this in the future. In the meantime, you may use the Dockerfile in this repository for cautious inspiration.
 
 
 ## Installation
 
-There are three main choices here, given in decreasing order of recommendation. 
-**Important note to users of 0.2.x and earlier versions**: the package name in `setup.py` was changed from `clfd-pulsar` to `clfd` in version 0.3.0. This has the potential to cause some trouble. **When upgrading from a version older than v0.3.0, users should first cleanly uninstall any older versions of** `clfd` by typing `pip uninstall clfd-pulsar`. Also, if you created a shell alias called `clfd` that points to `apps/cleanup.py`, please remove it, as the new setup script now automatically takes care of creating it (via a console_scripts entry point).
+#### From PyPI
 
-
-#### Installing with pip
-
-The easiest method is to use pip install, which pulls the latest release from the python package index and installs all dependencies:
+The easiest method is to install the latest release is:
 ```
 pip install clfd
 ```
 
-The main command-line application of should now be available:
+The main command-line application should now be available to run, see below for more details.
 ```
 clfd --help
 ```
-And you should see the full help of the application, see next section for more details.
 
 
 #### Editable installation
 
-Alternatively, you can clone the repository and in the base directory of `clfd` just type:
+If you want to freely edit the code and perhaps contribute, clone the repository and in the base directory of `clfd` run:
 
 ```bash
-make install
+pip install -e .[dev]
 ```
 
-This simply runs ``pip install`` in [editable mode](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs) with extra development dependencies, which means you can freely edit the code.
+Which performs an [editable install](https://pip.pypa.io/en/latest/reference/pip_install/#editable-installs) with additional development dependencies.
 
 
 #### The PYTHONPATH method
 
-If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters) or like to play it old school, then you can simply clone the repository and add the base directory of ``clfd`` to your ``PYTHONPATH`` environment variable, but then:  
+If you are not allowed to install packages with ``pip`` (this may be the case on some computing clusters), or perhaps want to work around the idiosyncratic installation process of the PSRCHIVE Python bindings, then you can clone the repository and add the base directory of ``clfd`` to your ``PYTHONPATH`` environment variable, but then:  
 1. You have to install the required dependencies manually.
-2. The main command-line application `clfd` (see below) will **NOT** be placed in your `PATH` automatically, which means that you may want to create a shell alias that points to `clfd/apps/cleanup.py` to make life enjoyable.
+2. The main command-line application `clfd` (see below) will **NOT** be made available in your `PATH` automatically.
 
-I warmly recommend using one of the methods above unless you have no other option.
-
+We warmly recommend using one of the methods above unless you have no other option.
 
 ## What features / profile statistics to use
 
