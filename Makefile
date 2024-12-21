@@ -10,7 +10,6 @@ dist: clean ## Build source distributions
 install: ## Install the package in development mode
 	pip install -e .[dev]
 
-# NOTE: remove the .egg-info directory
 uninstall: ## Uninstall the package
 	pip uninstall ${PKG}
 	rm -rf ${PKG}.egg-info
@@ -46,7 +45,7 @@ format: ## Apply automatic formatting
 	black --exclude .+\.ipynb --line-length ${LINE_LENGTH} ${PKG_DIR}/
 	isort --profile black --line-length ${LINE_LENGTH} ${PKG_DIR}/
 
-tests: ## Run unit tests
-	pytest -vv ${TESTS_DIR}
+test: ## Run unit tests
+	MPLBACKEND=Agg pytest -vv ${TESTS_DIR}
 
 .PHONY: dist install uninstall help clean tests
