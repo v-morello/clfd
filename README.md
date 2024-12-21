@@ -1,3 +1,4 @@
+![CI status](https://github.com/v-morello/clfd/actions/workflows/CI.yml/badge.svg?branch=master)
 [![arXiv](http://img.shields.io/badge/astro.ph-1811.04929-B31B1B.svg)](https://arxiv.org/abs/1811.04929)  ![License](https://img.shields.io/badge/License-MIT-green.svg)  ![Python versions](https://img.shields.io/pypi/pyversions/clfd.svg)
 
 # clfd
