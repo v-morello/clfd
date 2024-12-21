@@ -40,6 +40,7 @@ dev = [
   "flake8",
   "black",
   "pytest",
+  "pytest-cov",
   "build",
   "twine",
 ]
