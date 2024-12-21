@@ -1,10 +1,3 @@
-#!/usr/bin/env python
-# NOTE: this is the right shebang, compatible with virtual / conda environments
-# https://stackoverflow.com/questions/6908143/should-i-put-shebang-in-python-scripts-and-what-form-should-it-take
-
-# NOTE: This script cannot be named clfd.py, because that makes any statement
-# 'import clfd.X' fail
-
 import argparse
 import logging
 import os
@@ -30,13 +23,6 @@ def parse_arguments():
         Version: {}".format(
             clfd.__version__
         ),
-    )
-    parser.add_argument(
-        "--fmt",
-        type=str,
-        choices=["psrchive"],
-        default="psrchive",
-        help="Input file format",
     )
     parser.add_argument(
         "-o",
@@ -117,7 +103,7 @@ def parse_arguments():
         version=clfd.__version__,
         help="Print version number and exit",
     )
-    parser.add_argument("filenames", type=str, nargs="+", help="Input file(s)")
+    parser.add_argument("archives", type=str, nargs="+", help="Input PSRCHIVE archive(s)")
     args = parser.parse_args()
     return args
 
@@ -130,11 +116,11 @@ def main():
 
     # Format keyword arguments properly for the cleanup_main() function
     kw = dict(vars(args))
-    kw.pop("filenames")
+    kw.pop("archives")
 
     kw.pop("no_report")
     kw["report"] = not args.no_report
-    cleanup_main(args.filenames, **kw)
+    cleanup_main(args.archives, **kw)
 
 
 if __name__ == "__main__":
