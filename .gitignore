@@ -5,3 +5,7 @@
 __pycache__
 .venv
 dist/*
+build/
+.pytest_cache
+.coverage
+scratch/

@@ -1,63 +1,74 @@
-import inspect
-import os
-import unittest
+from typing import Callable, Iterable
 
-import numpy
+import numpy as np
+import pytest
+from numpy.typing import NDArray
 
-import clfd
-import clfd.features
-from .utils import get_example_data_path
+from clfd import profile_mask
+from clfd.features import available_features
+from clfd.serialization import json_dumps, json_loads
 
-
-def load_test_datacube():
-    fname = os.path.join(get_example_data_path(), "npy_example.npy")
-    return clfd.DataCube.from_npy(fname)
+from .utils import ndarray_eq
 
 
-def load_features():
-    """Returns a list of tuples (feature_name, featurizer_function)"""
-    return inspect.getmembers(clfd.features, inspect.isfunction)
+@pytest.mark.parametrize(
+    "feature",
+    available_features().values(),
+    ids=available_features().keys(),
+)
+def test_feature_returns_ndarray_with_expected_shape(
+    data_cube: NDArray, feature: Callable
+):
+    result = feature(data_cube)
+    assert isinstance(result, np.ndarray)
+    assert result.shape == data_cube.shape[:2]
 
 
-class TestFeatures(unittest.TestCase):
-    def setUp(self):
-        self.cube = load_test_datacube()
-        self.functions = load_features()
-
-    def test_features(self):
-        for name, func in self.functions:
-            out = func(self.cube)
-            self.assertEqual(out.shape, self.cube.data.shape[:2])
+def test_profile_masking(data_cube: NDArray, expected_profmask: NDArray):
+    result = profile_mask(
+        data_cube, features=("std", "ptp", "lfamp"), q=2.0, zap_channels=()
+    )
+    assert np.array_equal(result.mask, expected_profmask)
 
 
-class TestFeaturize(unittest.TestCase):
-    def setUp(self):
-        self.cube = load_test_datacube()
-        self.feature_names = [name for name, func in load_features()]
-        self.num_features = len(self.feature_names)
-
-    def test_featurize(self):
-        for n in range(self.num_features):
-            clfd.featurize(self.cube, features=self.feature_names[: n + 1])
-
-
-class TestProfileMask(unittest.TestCase):
-    def setUp(self):
-        self.cube = load_test_datacube()
-        self.feature_names = [name for name, func in load_features()]
-
-    def test_profile_mask(self):
-        data = clfd.featurize(self.cube, features=self.feature_names)
-
-        # Without specifying zapped channels
-        __, mask = clfd.profile_mask(data, zap_channels=[])
-
-        # With specifying zapped channels
-        # Ensure that those zapped channels are indeed masked in the output mask
-        zap_channels = numpy.arange(0, self.cube.num_chans, 2)
-        __, mask = clfd.profile_mask(data, zap_channels=zap_channels, q=1000.0)
-        self.assertTrue(numpy.all(mask[:, zap_channels]))
+@pytest.mark.parametrize(
+    "zap_channels", [[0], [127], [17, 3, 93, 42], range(42, 93)], ids=repr
+)
+def test_profile_masking_with_zapped_channels(
+    data_cube: NDArray, zap_channels: Iterable[int]
+):
+    result = profile_mask(data_cube, q=1.0e9, zap_channels=zap_channels)
+    assert set(result.zap_channels) == set(zap_channels)
+    assert result.zap_channels == sorted(result.zap_channels)
+    assert np.all(result.mask[:, zap_channels])
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_profile_masking_ignores_out_of_range_zap_channels(data_cube: NDArray):
+    result = profile_mask(data_cube, q=1.0e9, zap_channels=range(120, 140))
+
+    expected_zap_chanels = list(range(120, 128))
+    assert result.zap_channels == expected_zap_chanels
+
+    is_whole_channel_masked = np.ufunc.reduce(
+        np.logical_and, result.mask, axis=1
+    )
+    assert np.all(is_whole_channel_masked[120:128])
+    assert np.all(np.logical_not(is_whole_channel_masked[0:120]))
+
+
+def test_profile_masking_serialization_roundtrip(data_cube: NDArray):
+    result = profile_mask(
+        data_cube, features=("std", "ptp", "lfamp"), q=2.0, zap_channels=()
+    )
+    serialized = json_dumps(result)
+    deserialized = json_loads(serialized)
+    assert ndarray_eq(deserialized, result)
+
+
+def test_profile_masking_with_all_channels_zapped_raises_value_error(
+    data_cube: NDArray,
+):
+    num_chan = data_cube.shape[1]
+    expected_msg = "Cannot run profile masking with all channels zapped"
+    with pytest.raises(ValueError, match=expected_msg):
+        profile_mask(data_cube, zap_channels=range(num_chan))
