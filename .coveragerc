@@ -1,0 +1,7 @@
+[run]
+concurrency = multiprocessing
+parallel = true
+sigterm = true
+
+# Have to do this for some reason
+omit = psrchive.py

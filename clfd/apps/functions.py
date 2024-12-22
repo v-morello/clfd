@@ -129,4 +129,6 @@ def cleanup_main(
     log.info("Using {:d} parallel processes".format(processes))
     with multiprocessing.Pool(processes=processes) as pool:
         pool.map(worker, filenames)
+        pool.close()
+        pool.join()
     log.info("Done.")
