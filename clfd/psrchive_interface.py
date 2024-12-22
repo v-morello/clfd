@@ -8,32 +8,7 @@ except ImportError:
     pass
 
 
-class Interface(object):
-    """Base class for an interface to some file format."""
-
-    @staticmethod
-    def get_frequencies(archive):
-        """Return channel frequencies in MHz, as a numpy array"""
-        raise NotImplementedError
-
-    @staticmethod
-    def apply_profile_mask(mask, archive):
-        raise NotImplementedError
-
-    @staticmethod
-    def apply_time_phase_mask(mask, valid_chans, repvals, archive):
-        raise NotImplementedError
-
-    @staticmethod
-    def load(fname):
-        raise NotImplementedError
-
-    @staticmethod
-    def save(fname, archive):
-        raise NotImplementedError
-
-
-class PsrchiveInterface(Interface):
+class PsrchiveInterface:
     """Interface to PSRCHIVE format."""
 
     @staticmethod
@@ -115,13 +90,3 @@ class PsrchiveInterface(Interface):
     @staticmethod
     def save(fname, archive):
         archive.unload(fname)
-
-
-def get_interface(fmt):
-    """Get Interface class for given format name."""
-    interfaces = {"psrchive": PsrchiveInterface}
-    fmt = fmt.lower()
-    if fmt not in interfaces:
-        msg = "No interface for format: {:s}".format(fmt)
-        raise ValueError(msg)
-    return interfaces[fmt]

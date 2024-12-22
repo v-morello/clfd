@@ -4,8 +4,7 @@ import unittest
 
 import numpy
 
-from clfd import DataCube, featurize, profile_mask, time_phase_mask
-from clfd.interfaces import PsrchiveInterface
+from clfd import DataCube, featurize, profile_mask, time_phase_mask, PsrchiveInterface
 from .utils import HAS_PSRCHIVE, get_example_data_path
 
 

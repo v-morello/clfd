@@ -1,9 +1,8 @@
 import logging
-import multiprocessing
 import os
 
 import clfd
-import clfd.interfaces
+from clfd import PsrchiveInterface
 
 log = logging.getLogger("clfd")
 
@@ -13,7 +12,6 @@ def load_zapfile(fname: str) -> list[int]:
     log.debug(f"Loading zapfile: {fname}")
     with open(fname, "r") as file:
         zap_channels = list(map(int, file.read().strip().split()))
-    log.debug(f"Ignoring {len(zap_channels)} channel indices: {zap_channels}")
     return zap_channels
 
 
@@ -35,15 +33,14 @@ def cleanup_file(
     basename, __ = os.path.splitext(fname)
 
     log.debug("Processing: {:s}".format(fpath))
-    interface = clfd.interfaces.get_interface("psrchive")
-    archive, cube = interface.load(fpath)
+    archive, cube = PsrchiveInterface.load(fpath)
 
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
 
     # Profile masking
     features = clfd.featurize(cube, features=features)
     stats, mask = clfd.profile_mask(features, q=qmask, zap_channels=zap_channels)
-    interface.apply_profile_mask(mask, archive)
+    PsrchiveInterface.apply_profile_mask(mask, archive)
     msg = "{:s} profiles masked: {:d} / {:d} ({:.1%})".format(
         fname, mask.sum(), mask.size, mask.sum() / float(mask.size)
     )
@@ -54,7 +51,7 @@ def cleanup_file(
         tpmask, valid_chans, repvals = clfd.time_phase_mask(
             cube, q=qspike, zap_channels=zap_channels
         )
-        interface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
+        PsrchiveInterface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
         msg = "{:s} time-phase bins masked: {:d} / {:d} ({:.1%})".format(
             fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size)
         )
@@ -71,14 +68,14 @@ def cleanup_file(
     outdir = os.path.realpath(outdir) if outdir else fdir
     outpath = "{}.{}".format(os.path.join(outdir, fname), ext)
 
-    interface.save(outpath, archive)
+    PsrchiveInterface.save(outpath, archive)
     log.debug("Saved output archive: {:s}".format(outpath))
 
     # Save report
     if report:
         report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
 
-        frequencies = interface.get_frequencies(archive)
+        frequencies = PsrchiveInterface.get_frequencies(archive)
         report = clfd.Report(
             features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike
         )
@@ -97,38 +94,3 @@ class Worker:
     def __call__(self, fpath: str):
         kwargs = self.cleanup_file_kwargs | {"fpath": fpath}
         cleanup_file(**kwargs)
-
-
-def cleanup_main(
-    filenames,
-    outdir=None,
-    zapfile=None,
-    features=("std", "ptp", "lfamp"),
-    qmask=2.0,
-    despike=False,
-    qspike=4.0,
-    ext="clfd",
-    report=True,
-    processes=1,
-):
-    log.debug("Files to process: {:d}".format(len(filenames)))
-    zap_channels = load_zapfile(zapfile) if zapfile else []
-
-    cleanup_file_kwargs = {
-        "zap_channels": zap_channels,
-        "outdir": outdir,
-        "features": features,
-        "qmask": qmask,
-        "despike": despike,
-        "qspike": qspike,
-        "ext": ext,
-        "report": report,
-    }
-    worker = Worker(cleanup_file_kwargs)
-
-    log.info("Using {:d} parallel processes".format(processes))
-    with multiprocessing.Pool(processes=processes) as pool:
-        pool.map(worker, filenames)
-        pool.close()
-        pool.join()
-    log.info("Done.")

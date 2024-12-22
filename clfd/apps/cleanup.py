@@ -1,10 +1,11 @@
 import argparse
 import logging
+import multiprocessing
 import os
 
 import clfd
-import clfd.interfaces
-from clfd.apps import cleanup_main
+
+from .functions import Worker, load_zapfile
 
 log = logging.getLogger("clfd")
 
@@ -113,14 +114,30 @@ def main():
 
     args = parse_arguments()
     log.debug("Called with arguments: {!s}".format(vars(args)))
+    log.debug("Files to process: {:d}".format(len(args.archives)))
 
-    # Format keyword arguments properly for the cleanup_main() function
-    kw = dict(vars(args))
-    kw.pop("archives")
+    zap_channels = load_zapfile(args.zapfile) if args.zapfile else []
+    log.debug(f"Ignoring {len(zap_channels)} channel indices: {zap_channels}")
 
-    kw.pop("no_report")
-    kw["report"] = not args.no_report
-    cleanup_main(args.archives, **kw)
+    worker = Worker(
+        {
+            "zap_channels": zap_channels,
+            "outdir": args.outdir,
+            "features": args.features,
+            "qmask": args.qmask,
+            "despike": args.despike,
+            "qspike": args.qspike,
+            "ext": args.ext,
+            "report": not args.no_report,
+        }
+    )
+
+    log.info("Using {:d} parallel processes".format(args.processes))
+    with multiprocessing.Pool(processes=args.processes) as pool:
+        pool.map(worker, args.archives)
+        pool.close()
+        pool.join()
+    log.info("Done.")
 
 
 if __name__ == "__main__":
