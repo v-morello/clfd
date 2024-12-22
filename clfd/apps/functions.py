@@ -1,8 +1,7 @@
 import logging
 import os
 
-import clfd
-from clfd import PsrchiveInterface
+from clfd import ArchiveWrapper, Report, featurize, profile_mask, time_phase_mask
 
 log = logging.getLogger("clfd")
 
@@ -33,14 +32,15 @@ def cleanup_file(
     basename, __ = os.path.splitext(fname)
 
     log.debug("Processing: {:s}".format(fpath))
-    archive, cube = PsrchiveInterface.load(fpath)
+    archive_wrapper = ArchiveWrapper.fromfile(fpath)
+    cube = archive_wrapper.data_cube()
 
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
 
     # Profile masking
-    features = clfd.featurize(cube, features=features)
-    stats, mask = clfd.profile_mask(features, q=qmask, zap_channels=zap_channels)
-    PsrchiveInterface.apply_profile_mask(mask, archive)
+    features = featurize(cube, features=features)
+    stats, mask = profile_mask(features, q=qmask, zap_channels=zap_channels)
+    archive_wrapper.apply_profile_mask(mask)
     msg = "{:s} profiles masked: {:d} / {:d} ({:.1%})".format(
         fname, mask.sum(), mask.size, mask.sum() / float(mask.size)
     )
@@ -48,10 +48,8 @@ def cleanup_file(
 
     # Spike removal (optional)
     if despike:
-        tpmask, valid_chans, repvals = clfd.time_phase_mask(
-            cube, q=qspike, zap_channels=zap_channels
-        )
-        PsrchiveInterface.apply_time_phase_mask(tpmask, valid_chans, repvals, archive)
+        tpmask, valid_chans, repvals = time_phase_mask(cube, q=qspike, zap_channels=zap_channels)
+        archive_wrapper.apply_time_phase_mask(tpmask, valid_chans, repvals)
         msg = "{:s} time-phase bins masked: {:d} / {:d} ({:.1%})".format(
             fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size)
         )
@@ -68,15 +66,15 @@ def cleanup_file(
     outdir = os.path.realpath(outdir) if outdir else fdir
     outpath = "{}.{}".format(os.path.join(outdir, fname), ext)
 
-    PsrchiveInterface.save(outpath, archive)
+    archive_wrapper.save(outpath)
     log.debug("Saved output archive: {:s}".format(outpath))
 
     # Save report
     if report:
         report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
 
-        frequencies = PsrchiveInterface.get_frequencies(archive)
-        report = clfd.Report(
+        frequencies = archive_wrapper.channel_frequencies
+        report = Report(
             features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike
         )
         report.save(report_path)

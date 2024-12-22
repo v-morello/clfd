@@ -37,13 +37,13 @@ upload: ## Upload the distribution source to the REAL PyPI
 	twine upload dist/*
 
 lint: ## Run linting
-	isort --check-only --profile black --line-length ${LINE_LENGTH}  ${PKG_DIR}
-	flake8 --show-source --statistics --max-line-length ${LINE_LENGTH}  ${PKG_DIR}
-	black --exclude .+\.ipynb --check --line-length ${LINE_LENGTH}  ${PKG_DIR}
+	isort --check-only --profile black --line-length ${LINE_LENGTH}  ${PKG_DIR}  ${TESTS_DIR}
+	flake8 --show-source --statistics --max-line-length ${LINE_LENGTH}  ${PKG_DIR}  ${TESTS_DIR}
+	black --exclude .+\.ipynb --check --line-length ${LINE_LENGTH}  ${PKG_DIR}  ${TESTS_DIR}
 
 format: ## Apply automatic formatting
-	black --exclude .+\.ipynb --line-length ${LINE_LENGTH} ${PKG_DIR}
-	isort --profile black --line-length ${LINE_LENGTH} ${PKG_DIR}
+	black --exclude .+\.ipynb --line-length ${LINE_LENGTH} ${PKG_DIR}  ${TESTS_DIR}
+	isort --profile black --line-length ${LINE_LENGTH} ${PKG_DIR}  ${TESTS_DIR}
 
 test: ## Run unit tests
 	MPLBACKEND=Agg pytest -vv --cov ${PKG_DIR}

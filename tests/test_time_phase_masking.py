@@ -5,6 +5,7 @@ import numpy
 
 import clfd
 import clfd.features
+
 from .utils import get_example_data_path
 
 

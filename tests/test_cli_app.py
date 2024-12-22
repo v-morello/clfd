@@ -1,13 +1,13 @@
 import subprocess
 from pathlib import Path
 
+import numpy as np
 import pytest
+from numpy.typing import NDArray
 
-from .utils import HAS_PSRCHIVE
 from clfd import Report
 
-import numpy as np
-from numpy.typing import NDArray
+from .utils import HAS_PSRCHIVE
 
 
 def test_cli_app_entrypoint_exists():

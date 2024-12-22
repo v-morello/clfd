@@ -5,6 +5,7 @@ import unittest
 import numpy
 
 import clfd
+
 from .utils import HAS_PSRCHIVE, get_example_data_path
 
 

@@ -5,6 +5,7 @@ import unittest
 import numpy
 
 import clfd
+
 from .utils import HAS_MATPLOTLIB, HAS_PYTABLES, get_example_data_path
 
 
