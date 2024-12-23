@@ -9,13 +9,11 @@ from clfd import ArchiveWrapper, featurize, profile_mask, time_phase_mask
 from .utils import HAS_PSRCHIVE
 
 
-@pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
 @pytest.fixture(name="archive_path")
 def fixture_archive_path() -> Path:
     return Path(__file__).parent / ".." / "example_data" / "psrchive_example.ar"
 
 
-@pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
 @pytest.fixture(name="archive_wrapper")
 def fixture_archive_wrapper(archive_path: Path) -> ArchiveWrapper:
     return ArchiveWrapper(archive_path)
