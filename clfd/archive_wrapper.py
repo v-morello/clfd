@@ -4,18 +4,17 @@ from typing import Iterable
 import numpy as np
 from numpy.typing import NDArray
 
-try:
-    import psrchive
-except ImportError:
-    pass
-
 
 class ArchiveWrapper:
     """
     Simple wrapper for a psrchive.Archive object, which allows editing it.
     """
 
-    def __init__(self, archive: psrchive.Archive):
+    def __init__(self, archive):
+        import psrchive
+
+        if not isinstance(archive, psrchive.Archive):
+            raise ValueError("archive must be a psrchive.Archive object")
         self._archive = archive
 
     def data_cube(self) -> NDArray:
@@ -87,6 +86,8 @@ class ArchiveWrapper:
 
     @classmethod
     def fromfile(cls, path: str | os.PathLike) -> "ArchiveWrapper":
+        import psrchive
+
         try:
             archive = psrchive.Archive_load(str(path))
         except AttributeError:
