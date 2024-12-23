@@ -56,7 +56,7 @@ class TestTimePhaseMask(unittest.TestCase):
         # That is because once the old outliers have been replaced by "good" values,
         # the range of acceptable value is reduced which may push previously "normal" points
         # into outlier status.
-        orig_data = self.cube.orig_data
+        orig_data = self.cube.data.copy()
         clean_data = apply_time_phase_mask(mask, valid_chans, repvals, orig_data)
         clean_cube = clfd.DataCube(clean_data)
         newmask, __, __ = clfd.time_phase_mask(clean_cube, q=q, zap_channels=zap_channels)

@@ -19,7 +19,7 @@ class TestDataCube(unittest.TestCase):
 
     def test_init(self):
         cube = clfd.DataCube(self.ndarray)
-        self.assertTrue(numpy.array_equal(cube.orig_data, self.ndarray))
+        self.assertTrue(numpy.array_equal(cube.data, self.ndarray))
 
     def test_input_type_errors(self):
         # Input must be numpy.ndarray
@@ -50,7 +50,7 @@ class TestDataCube(unittest.TestCase):
             cube1.save_npy(fname)
             cube2 = clfd.DataCube.from_npy(fname)
 
-            self.assertTrue(numpy.array_equal(cube1.orig_data, cube2.orig_data))
+            self.assertTrue(numpy.array_equal(cube1.data, cube2.data))
 
     @unittest.skipUnless(HAS_PSRCHIVE, "psrchive python bindings must be installed")
     def test_load_psrchive(self):

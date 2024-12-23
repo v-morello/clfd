@@ -34,32 +34,15 @@ class DataCube(object):
         if not data.shape[2] >= 2:
             raise ValueError("data must have at least 2 phase bins")
 
-        self._orig_data = data
-        self._baselines = np.median(self._orig_data, axis=2)
-        nsubs, nchans, __ = self._orig_data.shape
-        self._data = self._orig_data - self._baselines.reshape(nsubs, nchans, 1)
+        self._data = data
 
     @property
     def data(self):
         """
-        Data with profile baselines subtracted.
+        Underlying data as a numpy array with shape
+        (num_subints, num_chans, num_bins).
         """
         return self._data
-
-    @property
-    def orig_data(self):
-        """
-        Original data, before subtraction of profile baselines.
-        """
-        return self._orig_data
-
-    @property
-    def baselines(self):
-        """
-        2D array with shape (num_subints, num_chans) containing the baselines
-        of all profiles.
-        """
-        return self._baselines
 
     @property
     def num_subints(self):
@@ -73,19 +56,9 @@ class DataCube(object):
     def num_bins(self):
         return self.data.shape[2]
 
-    @property
-    def subbands(self):
-        """Sum of the data along the time axis. Output data order is (time, phase)."""
-        return self.data.sum(axis=0)
-
-    @property
-    def subints(self):
-        """Sum of the data along the frequency axis. Output data order is (freq, phase)."""
-        return self.data.sum(axis=1)
-
     def save_npy(self, fname, dtype=np.float32):
         """Save original 3D data to .npy file"""
-        np.save(fname, self.orig_data.astype(dtype))
+        np.save(fname, self.data.astype(dtype))
 
     @classmethod
     def from_npy(cls, fname):
@@ -323,16 +296,19 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
     num_valid_chans = valid_chans_mask.sum()
     valid_chans = np.where(valid_chans_mask)[0]
 
-    data = cube.data[:, valid_chans].sum(axis=1)
-    pcts = np.percentile(data, [25, 50, 75], axis=0)  # Q1, median, Q3 along time axis
+    # For the purposes of this masking algorithm, we need to manipulate
+    # baseline-subtracted data
+    baselines = np.median(cube.data, axis=2).reshape(cube.num_subints, cube.num_chans, 1)
+    subtracted_data = cube.data - baselines
+
+    subints = subtracted_data[:, valid_chans, :].sum(axis=1)
+    pcts = np.percentile(subints, [25, 50, 75], axis=0)  # Q1, median, Q3 along time axis
     stats = pandas.DataFrame(pcts).rename({0: "q1", 1: "med", 2: "q3"})
     stats.loc["iqr"] = stats.loc["q3"] - stats.loc["q1"]
     stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
     stats.loc["vmax"] = stats.loc["q3"] + q * stats.loc["iqr"]
 
-    mask = (data < stats.loc["vmin"].values) | (data > stats.loc["vmax"].values)
+    mask = (subints < stats.loc["vmin"].values) | (subints > stats.loc["vmax"].values)
 
-    nsubs, nchans, nbins = cube.data.shape
-    # NOTE: Don't forget to offset replacement values by profile baselines
-    repvals = stats.loc["med"].values / num_valid_chans + cube.baselines.reshape(nsubs, nchans, 1)
+    repvals = baselines + stats.loc["med"].values / num_valid_chans
     return mask, valid_chans, repvals
