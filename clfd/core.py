@@ -15,17 +15,15 @@ class DataCube(object):
     """Wrapper for three-dimensional folded data. The data order is
     (time, freq, phase)"""
 
-    def __init__(self, data, copy=False):
+    def __init__(self, data):
         """Create DataCube instance from numpy array.
         Classmethods are the preferred way of making a new DataCube instance.
 
         Parameters
         ----------
         data: ndarray
-            The folded data as a 3-dimensional array, in (time, freq, phase) order.
-        copy: bool, optional
-            If True, copy the input data. Otherwise the DataCube stores only a
-            reference to 'data' to save memory (default: False)
+            The folded data as a 3-dimensional array, in (time, freq, phase)
+            order.
         """
         if not isinstance(data, np.ndarray):
             raise ValueError("data must be a numpy array")
@@ -36,33 +34,31 @@ class DataCube(object):
         if not data.shape[2] >= 2:
             raise ValueError("data must have at least 2 phase bins")
 
-        if copy:
-            self._data = data.copy()
-        else:
-            self._data = data
-
-        self._subtract_baseline()
-
-    def _subtract_baseline(self):
-        """Subtract from every profile its median value"""
-        nsubs, nchans, nbins = self.data.shape
-        self._baselines = np.median(self.data, axis=2)
-        self._data -= self._baselines.reshape(nsubs, nchans, 1)
+        self._orig_data = data
+        self._baselines = np.median(self._orig_data, axis=2)
+        nsubs, nchans, __ = self._orig_data.shape
+        self._data = self._orig_data - self._baselines.reshape(nsubs, nchans, 1)
 
     @property
     def data(self):
-        """3D data"""
+        """
+        Data with profile baselines subtracted.
+        """
         return self._data
 
     @property
     def orig_data(self):
-        """Original data, without baselines subtracted."""
-        nsubs, nchans, nbins = self.data.shape
-        return self.data + self.baselines.reshape(nsubs, nchans, 1)
+        """
+        Original data, before subtraction of profile baselines.
+        """
+        return self._orig_data
 
     @property
     def baselines(self):
-        """2D array with shape (num_subints, num_chans) containing the baselines of all profiles."""
+        """
+        2D array with shape (num_subints, num_chans) containing the baselines
+        of all profiles.
+        """
         return self._baselines
 
     @property
@@ -89,7 +85,6 @@ class DataCube(object):
 
     def save_npy(self, fname, dtype=np.float32):
         """Save original 3D data to .npy file"""
-        nsubs, nchans, nbins = self.data.shape
         np.save(fname, self.orig_data.astype(dtype))
 
     @classmethod

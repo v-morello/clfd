@@ -18,11 +18,8 @@ class TestDataCube(unittest.TestCase):
         self.ndarray = numpy.load(self.npy_data_fname)
 
     def test_init(self):
-        # NOTE: need to leave self.ndarray untouched. It WILL be modified
-        # if wrapping it in a DataCube with copy=False
-        X = self.ndarray.copy()
-        clfd.DataCube(X, copy=False)
-        clfd.DataCube(X, copy=True)
+        cube = clfd.DataCube(self.ndarray)
+        self.assertTrue(numpy.array_equal(cube.orig_data, self.ndarray))
 
     def test_input_type_errors(self):
         # Input must be numpy.ndarray
@@ -49,11 +46,11 @@ class TestDataCube(unittest.TestCase):
             fname = fobj.name
 
             # NOTE: leaving self.ndarray untouched
-            cube1 = clfd.DataCube(self.ndarray, copy=True)
+            cube1 = clfd.DataCube(self.ndarray)
             cube1.save_npy(fname)
             cube2 = clfd.DataCube.from_npy(fname)
 
-            self.assertTrue(numpy.allclose(cube1.data, cube2.data))
+            self.assertTrue(numpy.array_equal(cube1.orig_data, cube2.orig_data))
 
     @unittest.skipUnless(HAS_PSRCHIVE, "psrchive python bindings must be installed")
     def test_load_psrchive(self):

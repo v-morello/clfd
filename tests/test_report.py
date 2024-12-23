@@ -16,7 +16,7 @@ class TestReport(unittest.TestCase):
         # Load test data
         self.npy_data_fname = os.path.join(get_example_data_path(), "npy_example.npy")
         self.ndarray = numpy.load(self.npy_data_fname)
-        self.cube = clfd.DataCube(self.ndarray, copy=False)
+        self.cube = clfd.DataCube(self.ndarray)
         self.frequencies = numpy.linspace(1181.0, 1581.0, 128)
 
         self.feature_names = ["std", "ptp", "lfamp"]
