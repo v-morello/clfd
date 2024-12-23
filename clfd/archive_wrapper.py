@@ -1,5 +1,5 @@
 import os
-from typing import Iterable
+from typing import Iterable, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -10,7 +10,7 @@ class ArchiveWrapper:
     Simple wrapper for a psrchive.Archive object, which allows editing it.
     """
 
-    def __init__(self, path: str | os.PathLike):
+    def __init__(self, path: Union[str, os.PathLike]):
         import psrchive
 
         try:
@@ -84,5 +84,5 @@ class ArchiveWrapper:
         fchn = fc + (bw - cw) / 2.0
         return np.linspace(fch1, fchn, n)
 
-    def save(self, path: str | os.PathLike):
+    def save(self, path: Union[str, os.PathLike]):
         self._archive.unload(str(path))
