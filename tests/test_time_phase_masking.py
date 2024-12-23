@@ -11,7 +11,7 @@ from .utils import get_example_data_path
 
 def load_test_datacube():
     fname = os.path.join(get_example_data_path(), "npy_example.npy")
-    return clfd.DataCube.from_npy(fname)
+    return numpy.load(fname)
 
 
 def apply_time_phase_mask(mask, valid_chans, repvals, orig_data):
@@ -32,9 +32,10 @@ class TestTimePhaseMask(unittest.TestCase):
         self.cube = load_test_datacube()
 
     def test_time_phase_mask(self):
+        num_subints, num_chans, num_bins = self.cube.shape
         q = 2.0
         zap_channels = range(10)
-        all_channels = range(self.cube.num_chans)
+        all_channels = range(num_chans)
 
         mask, valid_chans, repvals = clfd.time_phase_mask(self.cube, q=q, zap_channels=zap_channels)
 
@@ -45,8 +46,8 @@ class TestTimePhaseMask(unittest.TestCase):
         self.assertTrue(union == set(all_channels))
 
         # Check output shapes
-        self.assertEqual(mask.shape, (self.cube.num_subints, self.cube.num_bins))
-        self.assertEqual(repvals.shape, self.cube.data.shape)
+        self.assertEqual(mask.shape, (num_subints, num_bins))
+        self.assertEqual(repvals.shape, self.cube.shape)
 
         # Check replacement of values behaves as expected
         # Once bad values have been replaced, if we call time_phase_mask() again
@@ -56,10 +57,9 @@ class TestTimePhaseMask(unittest.TestCase):
         # That is because once the old outliers have been replaced by "good" values,
         # the range of acceptable value is reduced which may push previously "normal" points
         # into outlier status.
-        orig_data = self.cube.data.copy()
+        orig_data = self.cube.copy()
         clean_data = apply_time_phase_mask(mask, valid_chans, repvals, orig_data)
-        clean_cube = clfd.DataCube(clean_data)
-        newmask, __, __ = clfd.time_phase_mask(clean_cube, q=q, zap_channels=zap_channels)
+        newmask, __, __ = clfd.time_phase_mask(clean_data, q=q, zap_channels=zap_channels)
 
         # Check that no bin is flagged in both masks
         self.assertFalse(numpy.any(newmask & mask))

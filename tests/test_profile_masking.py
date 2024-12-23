@@ -12,7 +12,7 @@ from .utils import get_example_data_path
 
 def load_test_datacube():
     fname = os.path.join(get_example_data_path(), "npy_example.npy")
-    return clfd.DataCube.from_npy(fname)
+    return numpy.load(fname)
 
 
 def load_features():
@@ -26,7 +26,7 @@ class TestFeatures(unittest.TestCase):
         self.functions = load_features()
 
     def test_features(self):
-        for name, func in self.functions:
+        for __, func in self.functions:
             out = func(self.cube)
             self.assertEqual(out.shape, self.cube.data.shape[:2])
 
@@ -34,7 +34,7 @@ class TestFeatures(unittest.TestCase):
 class TestFeaturize(unittest.TestCase):
     def setUp(self):
         self.cube = load_test_datacube()
-        self.feature_names = [name for name, func in load_features()]
+        self.feature_names = [name for name, __ in load_features()]
         self.num_features = len(self.feature_names)
 
     def test_featurize(self):
@@ -55,7 +55,8 @@ class TestProfileMask(unittest.TestCase):
 
         # With specifying zapped channels
         # Ensure that those zapped channels are indeed masked in the output mask
-        zap_channels = numpy.arange(0, self.cube.num_chans, 2)
+        num_chans = self.cube.shape[1]
+        zap_channels = numpy.arange(0, num_chans, 2)
         __, mask = clfd.profile_mask(data, zap_channels=zap_channels, q=1000.0)
         self.assertTrue(numpy.all(mask[:, zap_channels]))
 

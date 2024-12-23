@@ -4,8 +4,6 @@ from typing import Iterable
 import numpy as np
 from numpy.typing import NDArray
 
-from .core import DataCube
-
 try:
     import psrchive
 except ImportError:
@@ -20,11 +18,12 @@ class ArchiveWrapper:
     def __init__(self, archive: psrchive.Archive):
         self._archive = archive
 
-    def data_cube(self) -> DataCube:
+    def data_cube(self) -> NDArray:
         """
-        Return a DataCube initialised from the underlying archive.
+        Return the archive data as a 3-dimensional numpy array of shape
+        (num_subints, num_chans, num_bins). Only Stokes I data is read.
         """
-        return DataCube.from_psrchive(self._archive)
+        return self._archive.get_data()[:, 0, :, :]
 
     def apply_profile_mask(self, mask: NDArray):
         """

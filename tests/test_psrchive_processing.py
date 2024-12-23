@@ -65,6 +65,6 @@ def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
 
     for i, j in zip(*np.where(mask)):
         assert np.allclose(
-            cube.data[i, valid_chans, j],
+            cube[i, valid_chans, j],
             repvals[i, valid_chans, j],
         )

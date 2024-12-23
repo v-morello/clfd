@@ -1,117 +1,22 @@
 from collections import OrderedDict
+from typing import Iterable
 
 import numpy as np
 import pandas
+from numpy.typing import NDArray
 
 import clfd.features as pf
 
-try:
-    import psrchive
-except ImportError:
-    pass
 
-
-class DataCube(object):
-    """Wrapper for three-dimensional folded data. The data order is
-    (time, freq, phase)"""
-
-    def __init__(self, data):
-        """Create DataCube instance from numpy array.
-        Classmethods are the preferred way of making a new DataCube instance.
-
-        Parameters
-        ----------
-        data: ndarray
-            The folded data as a 3-dimensional array, in (time, freq, phase)
-            order.
-        """
-        if not isinstance(data, np.ndarray):
-            raise ValueError("data must be a numpy array")
-        if not len(data.shape) == 3:
-            raise ValueError("data must be 3-dimensional")
-        if not data.shape[0] * data.shape[1] >= 2:
-            raise ValueError("data must have at least 2 profiles")
-        if not data.shape[2] >= 2:
-            raise ValueError("data must have at least 2 phase bins")
-
-        self._data = data
-
-    @property
-    def data(self):
-        """
-        Underlying data as a numpy array with shape
-        (num_subints, num_chans, num_bins).
-        """
-        return self._data
-
-    @property
-    def num_subints(self):
-        return self.data.shape[0]
-
-    @property
-    def num_chans(self):
-        return self.data.shape[1]
-
-    @property
-    def num_bins(self):
-        return self.data.shape[2]
-
-    def save_npy(self, fname, dtype=np.float32):
-        """Save original 3D data to .npy file"""
-        np.save(fname, self.data.astype(dtype))
-
-    @classmethod
-    def from_npy(cls, fname):
-        """Load numpy array saved as a .npy file."""
-        data = np.load(fname)
-        return cls(data)
-
-    @classmethod
-    def from_psrchive(cls, archive):
-        """Create DataCube from PSRCHIVE Archive object. Only Stokes I data is read.
-
-        Parameters
-        ----------
-        archive: str or psrchive.Archive
-            Archive file (or object) to load.
-
-        Returns
-        -------
-        cube: DataCube
-            DataCube instance wrapping Stokes I data.
-        """
-        if isinstance(archive, str):
-            try:
-                archive = psrchive.Archive_load(archive)
-            except AttributeError:
-                archive = psrchive.Archive.load(archive)
-        # If neither of the above resolve, there is a
-        # PSRCHIVE installation problem and we want to
-        # terminate execution anyway.
-
-        # Extract Stokes I only
-        # Data shape is (n_subints, n_channels, n_phase_bins)
-        # NOTE: we do NOT dedisperse
-        data = archive.get_data()[:, 0, :, :]
-        return cls(data)
-
-    def __str__(self):
-        return "{:s}(shape=({:d}, {:d}, {:d}))".format(
-            type(self).__name__, self.num_subints, self.num_chans, self.num_bins
-        )
-
-    def __repr__(self):
-        return str(self)
-
-
-def featurize(cube, features=("std", "ptp", "lfamp")):
+def featurize(cube: NDArray, features: Iterable[str] = ("std", "ptp", "lfamp")):
     """Compute specified set of features for every profile in the given DataCube.
 
     Parameters
     ----------
-    cube: DataCube
-        The data cube to featurize.
-    features: list or tuple of strings
+    cube: NDArray
+        The data cube to featurize as a numpy array of shape
+        (num_subints, num_chans, num_bins)
+    features: iterable of strings
         List of features to compute. These must name functions in the 'clfd.features' submodule.
 
     Returns
@@ -119,7 +24,6 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
     features: pandas.DataFrame
         DataFrame containing the results. Columns are individual features, and rows are indexed
         by a pandas.MultiIndex (subint, channel).
-
 
     Examples
     --------
@@ -150,8 +54,9 @@ def featurize(cube, features=("std", "ptp", "lfamp")):
             msg = "No function '{:s}' in the clfd.features sub-module".format(fn)
             raise ValueError(msg)
 
+    num_subints, num_chans, __ = cube.shape
     index = pandas.MultiIndex.from_product(
-        [range(cube.num_subints), range(cube.num_chans)], names=["subint", "channel"]
+        [range(num_subints), range(num_chans)], names=["subint", "channel"]
     )
     data = OrderedDict()
     for fn in features:
@@ -263,13 +168,15 @@ def profile_mask(features, q=2.0, zap_channels=[]):
     return stats, mask
 
 
-def time_phase_mask(cube, q=4.0, zap_channels=[]):
+def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: list[int] = []):
     """Compute a data mask based on the cube's time-phase plot (sum of the
     data along the frequency axis of the cube).
 
     Parameters
     ----------
-    cube: DataCube
+    cube: NDArray
+        The input data cube as a numpy array of shape
+        (num_subints, num_chans, num_bins)
     q: float, optional (default: 4.0)
         Parameter that controls the min and max values that define the 'inlier' or
         'normality' range.
@@ -290,7 +197,8 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
         A bad time-phase bin with indices (i, j) means that
         orig_data[i, valid_chans, j] should be replaced by repvals[i, valid_chans, j].
     """
-    valid_chans_mask = np.ones(cube.num_chans, dtype=bool)
+    num_subints, num_chans, __ = cube.shape
+    valid_chans_mask = np.ones(num_chans, dtype=bool)
     if zap_channels:
         valid_chans_mask[zap_channels] = False
     num_valid_chans = valid_chans_mask.sum()
@@ -298,8 +206,8 @@ def time_phase_mask(cube, q=4.0, zap_channels=[]):
 
     # For the purposes of this masking algorithm, we need to manipulate
     # baseline-subtracted data
-    baselines = np.median(cube.data, axis=2).reshape(cube.num_subints, cube.num_chans, 1)
-    subtracted_data = cube.data - baselines
+    baselines = np.median(cube, axis=2).reshape(num_subints, num_chans, 1)
+    subtracted_data = cube - baselines
 
     subints = subtracted_data[:, valid_chans, :].sum(axis=1)
     pcts = np.percentile(subints, [25, 50, 75], axis=0)  # Q1, median, Q3 along time axis
