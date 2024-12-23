@@ -18,7 +18,7 @@ def fixture_archive_path() -> Path:
 @pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
 @pytest.fixture(name="archive_wrapper")
 def fixture_archive_wrapper(archive_path: Path) -> ArchiveWrapper:
-    return ArchiveWrapper.fromfile(archive_path)
+    return ArchiveWrapper(archive_path)
 
 
 @pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
@@ -32,7 +32,7 @@ def test_channel_frequencies_attribute(archive_wrapper: ArchiveWrapper):
 
 @pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
 def test_profile_masked_archive_is_saved_with_expected_weights(archive_path: Path, tmp_path: Path):
-    wrapper = ArchiveWrapper.fromfile(archive_path)
+    wrapper = ArchiveWrapper(archive_path)
     cube = wrapper.data_cube()
     features = featurize(cube, features=["std", "ptp", "lfamp"])
     __, mask = profile_mask(features, q=2.0, zap_channels=range(10))
@@ -41,7 +41,7 @@ def test_profile_masked_archive_is_saved_with_expected_weights(archive_path: Pat
     output_path = tmp_path / "archive.ar"
     wrapper.save(output_path)
 
-    wrapper = ArchiveWrapper.fromfile(output_path)
+    wrapper = ArchiveWrapper(output_path)
     assert np.array_equal(wrapper._archive.get_weights() == 0.0, mask)
 
 
@@ -49,7 +49,7 @@ def test_profile_masked_archive_is_saved_with_expected_weights(archive_path: Pat
 def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
     archive_path: Path, tmp_path: Path
 ):
-    wrapper = ArchiveWrapper.fromfile(archive_path)
+    wrapper = ArchiveWrapper(archive_path)
     cube = wrapper.data_cube()
 
     q = 2.0
@@ -60,7 +60,7 @@ def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
     output_path = tmp_path / "archive.ar"
     wrapper.save(output_path)
 
-    wrapper = ArchiveWrapper.fromfile(output_path)
+    wrapper = ArchiveWrapper(output_path)
     cube = wrapper.data_cube()
 
     for i, j in zip(*np.where(mask)):

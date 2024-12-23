@@ -32,7 +32,7 @@ def cleanup_file(
     basename, __ = os.path.splitext(fname)
 
     log.debug("Processing: {:s}".format(fpath))
-    archive_wrapper = ArchiveWrapper.fromfile(fpath)
+    archive_wrapper = ArchiveWrapper(fpath)
     cube = archive_wrapper.data_cube()
 
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))

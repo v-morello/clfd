@@ -10,11 +10,14 @@ class ArchiveWrapper:
     Simple wrapper for a psrchive.Archive object, which allows editing it.
     """
 
-    def __init__(self, archive):
+    def __init__(self, path: str | os.PathLike):
         import psrchive
 
-        if not isinstance(archive, psrchive.Archive):
-            raise ValueError("archive must be a psrchive.Archive object")
+        try:
+            archive = psrchive.Archive_load(str(path))
+        except AttributeError:
+            archive = psrchive.Archive.load(str(path))
+
         self._archive = archive
 
     def data_cube(self) -> NDArray:
@@ -83,13 +86,3 @@ class ArchiveWrapper:
 
     def save(self, path: str | os.PathLike):
         self._archive.unload(str(path))
-
-    @classmethod
-    def fromfile(cls, path: str | os.PathLike) -> "ArchiveWrapper":
-        import psrchive
-
-        try:
-            archive = psrchive.Archive_load(str(path))
-        except AttributeError:
-            archive = psrchive.Archive.load(str(path))
-        return cls(archive)
