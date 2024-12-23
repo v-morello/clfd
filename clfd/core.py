@@ -67,51 +67,6 @@ def featurize(cube: NDArray, features: Iterable[str] = ("std", "ptp", "lfamp")):
     return table
 
 
-def feature_stats(features, q=2.0):
-    """Compute quartiles, inter-quartile range and min/max acceptable values for every
-    column in 'features' based on Tukey's rule for outliers.
-
-    Parameters
-    ----------
-    features: pandas.DataFrame
-        Output of the featurize() function.
-    q: float, optional (default: 2.0)
-        Parameter that controls the min and max values that define the 'inlier' or
-        'normality' range. For every feature, the first and third quartiles (Q1 and Q3)
-        are calculated, and R = Q3 - Q1 is the interquartile range. The min and max
-        acceptable values are then defined as:
-
-        vmin = Q1 - q x R
-        vmax = Q3 + q x R
-
-        The original recommendation of Tukey is q = 1.5.
-
-    Returns
-    -------
-    stats: pandas.DataFrame
-        DataFrame containing the results. Columns are individual features, and rows are
-        individual statistics (quartiles, iqr, min and max values).
-
-    Examples
-    --------
-
-    An example output would look like:
-
-               std       ptp     lfamp
-    q1    0.025949  0.130252  0.173604
-    q3    0.028379  0.152941  0.387956
-    iqr   0.002430  0.022689  0.214352
-    vmin  0.021090  0.084874 -0.255099
-    vmax  0.033238  0.198319  0.816660
-    """
-    stats = features.quantile([0.25, 0.50, 0.75])
-    stats = stats.rename({0.25: "q1", 0.50: "med", 0.75: "q3"})
-    stats.loc["iqr"] = stats.loc["q3"] - stats.loc["q1"]
-    stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
-    stats.loc["vmax"] = stats.loc["q3"] + q * stats.loc["iqr"]
-    return stats
-
-
 def profile_mask(features, q=2.0, zap_channels=[]):
     """Compute profile mask, flagging outliers.
 
