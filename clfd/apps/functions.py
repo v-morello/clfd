@@ -1,7 +1,7 @@
 import logging
 import os
 
-from clfd import ArchiveWrapper, profile_masking, time_phase_mask
+from clfd import ArchiveWrapper, profile_mask, time_phase_mask
 
 log = logging.getLogger("clfd")
 
@@ -37,7 +37,7 @@ def cleanup_file(
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
 
     # Profile masking
-    result = profile_masking(cube, features, q=qmask, zap_channels=zap_channels)
+    result = profile_mask(cube, features, q=qmask, zap_channels=zap_channels)
     mask = result.mask
     archive_wrapper.apply_profile_mask(mask)
     msg = "{:s} profiles masked: {:d} / {:d} ({:.1%})".format(
