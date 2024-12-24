@@ -27,6 +27,18 @@ class TimePhaseMasking:
     orig_data[i, valid_chans, j] should be replaced by replacement_values[i, valid_chans, j].
     """
 
+    def apply(self, data: NDArray):
+        """
+        Apply to data cube, returning a new cube where bad values have been
+        replaced.
+        """
+        clean_data = data.copy()
+        for i, j in zip(*np.where(self.mask)):
+            clean_data[i, self.valid_channels, j] = self.replacement_values[
+                i, self.valid_channels, j
+            ]
+        return clean_data
+
 
 def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] = ()):
     """Compute a data mask based on the cube's time-phase plot (sum of the

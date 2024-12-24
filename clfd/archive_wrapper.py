@@ -1,8 +1,10 @@
 import os
-from typing import Iterable, Union
+from typing import Union
 
 import numpy as np
 from numpy.typing import NDArray
+
+from clfd.time_phase_masking import TimePhaseMasking
 
 
 class ArchiveWrapper:
@@ -43,13 +45,16 @@ class ArchiveWrapper:
             # get_Profile() complains about argument type
             self._archive.get_Profile(int(isub), ipol, int(ichan)).set_weight(0.0)
 
-    def apply_time_phase_mask(self, mask: NDArray, valid_chans: Iterable[int], repvals: NDArray):
+    def apply_time_phase_mask(self, tpm: TimePhaseMasking):
         """
         Apply time-phase mask to underlying archive, setting the values of bad
         time-phase bins to appropriate replacement values. All arguments are
         the output of the time_phase_mask() function.
         """
         ipol = 0
+        mask = tpm.mask
+        valid_chans = tpm.valid_channels
+        repvals = tpm.replacement_values
 
         # Replacement dictionary
         # {subint_index: [bad_phase_bins]}

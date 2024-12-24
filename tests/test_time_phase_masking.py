@@ -14,19 +14,6 @@ def load_test_datacube():
     return numpy.load(fname)
 
 
-def apply_time_phase_mask(mask, valid_chans, repvals, orig_data):
-    """Apply time-phase mask to original input data (BEFORE baseline subtraction).
-    If (i, j) is a True element of the mask, then replace
-    orig_data[i, valid_chans, j] by repvals[i, valid_chans, j].
-
-    Returns a copy of orig_data with bad values replaced.
-    """
-    clean_data = orig_data.copy()
-    for i, j in zip(*numpy.where(mask)):
-        clean_data[i, valid_chans, j] = repvals[i, valid_chans, j]
-    return clean_data
-
-
 class TestTimePhaseMask(unittest.TestCase):
     def setUp(self):
         self.cube = load_test_datacube()
@@ -57,10 +44,7 @@ class TestTimePhaseMask(unittest.TestCase):
         # That is because once the old outliers have been replaced by "good" values,
         # the range of acceptable value is reduced which may push previously "normal" points
         # into outlier status.
-        orig_data = self.cube.copy()
-        clean_data = apply_time_phase_mask(
-            result.mask, result.valid_channels, result.replacement_values, orig_data
-        )
+        clean_data = result.apply(self.cube)
         new_result = clfd.time_phase_mask(clean_data, q=q, zap_channels=zap_channels)
 
         # Check that no bin is flagged in both masks

@@ -52,7 +52,7 @@ def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
     q = 2.0
     zap_channels = range(10)
     result = time_phase_mask(cube, q=q, zap_channels=zap_channels)
-    wrapper.apply_time_phase_mask(result.mask, result.valid_channels, result.replacement_values)
+    wrapper.apply_time_phase_mask(result)
 
     output_path = tmp_path / "archive.ar"
     wrapper.save(output_path)
