@@ -102,7 +102,9 @@ def profile_mask2(
     feature_values = make_feature_values_dict(cube, features)
     feature_stats = make_feature_stats_dict(feature_values, np.logical_not(zap_mask))
     feature_masks = make_feature_mask_dict(feature_values, feature_stats, q)
+
     profile_mask = functools.reduce(np.logical_or, feature_masks.values())
+    profile_mask[:, zap_channels] = True
 
     return MaskingResult(
         feature_names=features,
