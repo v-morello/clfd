@@ -39,6 +39,19 @@ class TimePhaseMasking:
             ]
         return clean_data
 
+    def subint_to_bad_phase_bins_mapping(self) -> dict[int, NDArray]:
+        """
+        Returns a dictionary {subint_index: bad_phase_bin_indices}.
+        Useful for replacing bad data in a PSRCHIVE archive.
+        """
+        result = {}
+        num_subints = self.mask.shape[0]
+        for isub in range(num_subints):
+            (bad_bins,) = np.where(self.mask[isub])
+            if len(bad_bins):
+                result[isub] = bad_bins
+        return result
+
 
 def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] = ()):
     """Compute a data mask based on the cube's time-phase plot (sum of the

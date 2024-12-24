@@ -52,24 +52,14 @@ class ArchiveWrapper:
         the output of the time_phase_mask() function.
         """
         ipol = 0
-        mask = tpm.mask
-        valid_chans = tpm.valid_channels
         repvals = tpm.replacement_values
+        mapping = tpm.subint_to_bad_phase_bins_mapping()
 
-        # Replacement dictionary
-        # {subint_index: [bad_phase_bins]}
-        repdict = {}
-        num_subints, __ = mask.shape
-        for isub in range(num_subints):
-            bad_bins = np.where(mask[isub])[0]
-            if len(bad_bins):
-                repdict[isub] = bad_bins
-
-        for isub, bad_bins in repdict.items():
-            for ichan in valid_chans:
+        for isub, bad_bins in mapping.items():
+            for ichan in tpm.valid_channels:
                 # NOTE: cast indices from numpy.int64 to int, otherwise
                 # get_Profile() complains about argument type
-                amps = self._archive.get_Profile(int(isub), ipol, int(ichan)).get_amps()
+                amps = self._archive.get_Profile(isub, ipol, int(ichan)).get_amps()
                 amps[bad_bins] = repvals[isub, ichan, bad_bins]
 
     @property
