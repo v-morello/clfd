@@ -1,8 +1,11 @@
 import inspect
 import os
 import unittest
+from typing import Callable
 
 import numpy
+import pytest
+from numpy.typing import NDArray
 
 import clfd
 import clfd.features
@@ -20,15 +23,22 @@ def load_features():
     return inspect.getmembers(clfd.features, inspect.isfunction)
 
 
-class TestFeatures(unittest.TestCase):
-    def setUp(self):
-        self.cube = load_test_datacube()
-        self.functions = load_features()
+@pytest.fixture(name="data_cube")
+def fixture_data_cube() -> NDArray:
+    fname = os.path.join(get_example_data_path(), "npy_example.npy")
+    return numpy.load(fname)
 
-    def test_features(self):
-        for __, func in self.functions:
-            out = func(self.cube)
-            self.assertEqual(out.shape, self.cube.data.shape[:2])
+
+FEATURES: list[tuple[str, Callable]] = inspect.getmembers(clfd.features, inspect.isfunction)
+
+
+@pytest.mark.parametrize(
+    "feature", [func for _, func in FEATURES], ids=[name for name, _ in FEATURES]
+)
+def test_feature_returns_ndarray_with_expected_shape(data_cube: NDArray, feature: Callable):
+    result = feature(data_cube)
+    assert isinstance(result, numpy.ndarray)
+    assert result.shape == data_cube.shape[:2]
 
 
 class TestFeaturize(unittest.TestCase):
