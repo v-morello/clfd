@@ -47,17 +47,15 @@ def cleanup_file(
 
     # Spike removal (optional)
     if despike:
-        tpmask, valid_chans, repvals = time_phase_mask(cube, q=qspike, zap_channels=zap_channels)
-        archive_wrapper.apply_time_phase_mask(tpmask, valid_chans, repvals)
+        tpmasking = time_phase_mask(cube, q=qspike, zap_channels=zap_channels)
+        archive_wrapper.apply_time_phase_mask(
+            tpmasking.mask, tpmasking.valid_channels, tpmasking.replacement_values
+        )
+        mask = tpmasking.mask
         msg = "{:s} time-phase bins masked: {:d} / {:d} ({:.1%})".format(
-            fname, tpmask.sum(), tpmask.size, tpmask.sum() / float(tpmask.size)
+            fname, mask.sum(), mask.size, mask.sum() / float(mask.size)
         )
         log.debug(msg)
-    else:
-        # NOTE: we set those values to None to be passed as parameters to
-        # the output Report
-        tpmask = None
-        qspike = None
 
     # Save output
     # outdir = None means that data products for a given input archive

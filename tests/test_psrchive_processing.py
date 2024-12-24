@@ -51,8 +51,8 @@ def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
 
     q = 2.0
     zap_channels = range(10)
-    mask, valid_chans, repvals = time_phase_mask(cube, q=q, zap_channels=zap_channels)
-    wrapper.apply_time_phase_mask(mask, valid_chans, repvals)
+    result = time_phase_mask(cube, q=q, zap_channels=zap_channels)
+    wrapper.apply_time_phase_mask(result.mask, result.valid_channels, result.replacement_values)
 
     output_path = tmp_path / "archive.ar"
     wrapper.save(output_path)
@@ -60,8 +60,8 @@ def test_time_phase_masked_archive_is_saved_with_expected_replacement_values(
     wrapper = ArchiveWrapper(output_path)
     cube = wrapper.data_cube()
 
-    for i, j in zip(*np.where(mask)):
+    for i, j in zip(*np.where(result.mask)):
         assert np.allclose(
-            cube[i, valid_chans, j],
-            repvals[i, valid_chans, j],
+            cube[i, result.valid_channels, j],
+            result.replacement_values[i, result.valid_channels, j],
         )

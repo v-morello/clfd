@@ -14,8 +14,18 @@ class TimePhaseMasking:
     """
 
     q: float
-    zap_channels: tuple[int]
+    valid_channels: tuple[int]
+
     mask: NDArray
+    """
+    Shape (num_subints, num_chans)
+    """
+
+    replacement_values: NDArray
+    """
+    Replacement values with same shape as original cube.
+    orig_data[i, valid_chans, j] should be replaced by replacement_values[i, valid_chans, j].
+    """
 
 
 def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] = ()):
@@ -50,7 +60,7 @@ def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] =
     num_subints, num_chans, __ = cube.shape
     zap_channels, zap_mask = make_in_bounds_zap_indices_and_mask(zap_channels, num_chans)
     keep_mask = np.logical_not(zap_mask)
-    (valid_chans,) = np.where(keep_mask)
+    (valid_channels,) = np.where(keep_mask)
 
     # For the purposes of this masking algorithm, we need to manipulate
     # baseline-subtracted data
@@ -65,5 +75,8 @@ def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] =
     vmax = q3 + q * iqr
 
     mask = (subints < vmin) | (subints > vmax)
-    repvals = baselines + med / len(valid_chans)
-    return mask, valid_chans, repvals
+    repvals = baselines + med / len(valid_channels)
+
+    return TimePhaseMasking(
+        q=q, valid_channels=valid_channels, mask=mask, replacement_values=repvals
+    )

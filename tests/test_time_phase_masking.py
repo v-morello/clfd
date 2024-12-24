@@ -37,17 +37,17 @@ class TestTimePhaseMask(unittest.TestCase):
         zap_channels = range(10)
         all_channels = range(num_chans)
 
-        mask, valid_chans, repvals = clfd.time_phase_mask(self.cube, q=q, zap_channels=zap_channels)
+        result = clfd.time_phase_mask(self.cube, q=q, zap_channels=zap_channels)
 
         # Check that valid_chans is the complement set of zap_channels
-        isect = set(zap_channels).intersection(set(valid_chans))
-        union = set(zap_channels).union(set(valid_chans))
+        isect = set(zap_channels).intersection(set(result.valid_channels))
+        union = set(zap_channels).union(set(result.valid_channels))
         self.assertFalse(isect)
         self.assertTrue(union == set(all_channels))
 
         # Check output shapes
-        self.assertEqual(mask.shape, (num_subints, num_bins))
-        self.assertEqual(repvals.shape, self.cube.shape)
+        self.assertEqual(result.mask.shape, (num_subints, num_bins))
+        self.assertEqual(result.replacement_values.shape, self.cube.shape)
 
         # Check replacement of values behaves as expected
         # Once bad values have been replaced, if we call time_phase_mask() again
@@ -58,11 +58,13 @@ class TestTimePhaseMask(unittest.TestCase):
         # the range of acceptable value is reduced which may push previously "normal" points
         # into outlier status.
         orig_data = self.cube.copy()
-        clean_data = apply_time_phase_mask(mask, valid_chans, repvals, orig_data)
-        newmask, __, __ = clfd.time_phase_mask(clean_data, q=q, zap_channels=zap_channels)
+        clean_data = apply_time_phase_mask(
+            result.mask, result.valid_channels, result.replacement_values, orig_data
+        )
+        new_result = clfd.time_phase_mask(clean_data, q=q, zap_channels=zap_channels)
 
         # Check that no bin is flagged in both masks
-        self.assertFalse(numpy.any(newmask & mask))
+        self.assertFalse(numpy.any(new_result.mask & result.mask))
 
 
 if __name__ == "__main__":
