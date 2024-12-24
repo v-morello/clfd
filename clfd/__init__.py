@@ -2,12 +2,10 @@
 from ._version import __version__
 from .archive_wrapper import ArchiveWrapper
 from .core import profile_mask, time_phase_mask
-from .report import Report
 
 __all__ = [
     "profile_mask",
     "time_phase_mask",
-    "Report",
     "ArchiveWrapper",
     "__version__",
 ]

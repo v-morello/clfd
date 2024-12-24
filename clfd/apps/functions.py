@@ -1,7 +1,7 @@
 import logging
 import os
 
-from clfd import ArchiveWrapper, Report, featurize, profile_mask, time_phase_mask
+from clfd import ArchiveWrapper, profile_mask, time_phase_mask
 
 log = logging.getLogger("clfd")
 
@@ -23,7 +23,6 @@ def cleanup_file(
     despike=False,
     qspike=4.0,
     ext="clfd",
-    report=True,
 ):
     # 'fpath': full-length absolute file path
     # 'fname': file name without base directory
@@ -38,8 +37,8 @@ def cleanup_file(
     log.debug("{:s} data shape: {!s}".format(fname, cube.data.shape))
 
     # Profile masking
-    features = featurize(cube, features=features)
-    stats, mask = profile_mask(features, q=qmask, zap_channels=zap_channels)
+    result = profile_mask(cube, features, q=qmask, zap_channels=zap_channels)
+    mask = result.profile_mask
     archive_wrapper.apply_profile_mask(mask)
     msg = "{:s} profiles masked: {:d} / {:d} ({:.1%})".format(
         fname, mask.sum(), mask.size, mask.sum() / float(mask.size)
@@ -69,16 +68,15 @@ def cleanup_file(
     archive_wrapper.save(outpath)
     log.debug("Saved output archive: {:s}".format(outpath))
 
-    # Save report
-    if report:
-        report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
-
-        frequencies = archive_wrapper.channel_frequencies
-        report = Report(
-            features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike
-        )
-        report.save(report_path)
-        log.debug("Saved report file: {:s}".format(report_path))
+    # # Save report
+    # if report:
+    #     report_path = "{}_clfd_report.h5".format(os.path.join(outdir, basename))
+    #     frequencies = archive_wrapper.channel_frequencies
+    #     report = Report(
+    #         features, stats, mask, qmask, frequencies, zap_channels, tpmask=tpmask, qspike=qspike
+    #     )
+    #     report.save(report_path)
+    #     log.debug("Saved report file: {:s}".format(report_path))
 
 
 class Worker:

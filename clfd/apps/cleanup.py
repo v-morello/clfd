@@ -128,7 +128,6 @@ def main():
             "despike": args.despike,
             "qspike": args.qspike,
             "ext": args.ext,
-            "report": not args.no_report,
         }
     )
 
