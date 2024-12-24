@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from typing import Callable, Iterable
 
 import numpy as np
-import pandas
 from numpy.typing import NDArray
 
 import clfd.features as pf
@@ -84,6 +83,15 @@ def make_feature_mask_dict(
     return result
 
 
+def make_in_bounds_zap_indices_and_mask(
+    zap_channels: Iterable[int], num_chan: int
+) -> tuple[NDArray, NDArray]:
+    zap_channels = [i for i in zap_channels if i in range(0, num_chan)]
+    zap_mask = np.zeros(num_chan, dtype=bool)
+    zap_mask[zap_channels] = True
+    return zap_channels, zap_mask
+
+
 def profile_masking(
     cube: NDArray,
     features: Iterable[str] = ("std", "ptp", "lfamp"),
@@ -93,11 +101,7 @@ def profile_masking(
     """
     TODO
     """
-    num_chan = cube.shape[1]
-    zap_channels = [i for i in zap_channels if i in range(0, num_chan)]
-    zap_mask = np.zeros(num_chan, dtype=bool)
-    zap_mask[zap_channels] = True
-
+    zap_channels, zap_mask = make_in_bounds_zap_indices_and_mask(zap_channels, cube.shape[1])
     feature_values = make_feature_values_dict(cube, features)
     feature_stats = make_feature_stats_dict(feature_values, np.logical_not(zap_mask))
     feature_masks = make_feature_mask_dict(feature_values, feature_stats, q)
@@ -115,7 +119,19 @@ def profile_masking(
     )
 
 
-def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: list[int] = []):
+@dataclass(frozen=True)
+class TimePhaseMasking:
+    """
+    TODO
+    """
+
+    q: float
+    zap_channels: tuple[int]
+    stats: Stats
+    mask: NDArray
+
+
+def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: Iterable[int] = ()):
     """Compute a data mask based on the cube's time-phase plot (sum of the
     data along the frequency axis of the cube).
 
@@ -145,25 +161,22 @@ def time_phase_mask(cube: NDArray, q: float = 4.0, zap_channels: list[int] = [])
         orig_data[i, valid_chans, j] should be replaced by repvals[i, valid_chans, j].
     """
     num_subints, num_chans, __ = cube.shape
-    valid_chans_mask = np.ones(num_chans, dtype=bool)
-    if zap_channels:
-        valid_chans_mask[zap_channels] = False
-    num_valid_chans = valid_chans_mask.sum()
-    valid_chans = np.where(valid_chans_mask)[0]
+    zap_channels, zap_mask = make_in_bounds_zap_indices_and_mask(zap_channels, num_chans)
+    keep_mask = np.logical_not(zap_mask)
+    (valid_chans,) = np.where(keep_mask)
 
     # For the purposes of this masking algorithm, we need to manipulate
     # baseline-subtracted data
     baselines = np.median(cube, axis=2).reshape(num_subints, num_chans, 1)
     subtracted_data = cube - baselines
+    subints = subtracted_data[:, keep_mask, :].sum(axis=1)
 
-    subints = subtracted_data[:, valid_chans, :].sum(axis=1)
-    pcts = np.percentile(subints, [25, 50, 75], axis=0)  # Q1, median, Q3 along time axis
-    stats = pandas.DataFrame(pcts).rename({0: "q1", 1: "med", 2: "q3"})
-    stats.loc["iqr"] = stats.loc["q3"] - stats.loc["q1"]
-    stats.loc["vmin"] = stats.loc["q1"] - q * stats.loc["iqr"]
-    stats.loc["vmax"] = stats.loc["q3"] + q * stats.loc["iqr"]
+    # Q1, median, Q3 along time axis
+    q1, med, q3 = np.percentile(subints, [25, 50, 75], axis=0)
+    iqr = q3 - q1
+    vmin = q1 - q * iqr
+    vmax = q3 + q * iqr
 
-    mask = (subints < stats.loc["vmin"].values) | (subints > stats.loc["vmax"].values)
-
-    repvals = baselines + stats.loc["med"].values / num_valid_chans
+    mask = (subints < vmin) | (subints > vmax)
+    repvals = baselines + med / len(valid_chans)
     return mask, valid_chans, repvals
