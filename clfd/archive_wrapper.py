@@ -33,11 +33,6 @@ class ArchiveWrapper:
         """
         Apply profile mask to underlying archive, setting the weights of masked
         profiles to zero.
-
-        Parameters
-        ----------
-        mask: ndarray
-            The boolean mask obtained with the profile_mask() function.
         """
         ipol = 0
         for isub, ichan in np.vstack(np.where(mask)).T:
@@ -48,8 +43,7 @@ class ArchiveWrapper:
     def apply_time_phase_mask(self, tpm: TimePhaseMasking):
         """
         Apply time-phase mask to underlying archive, setting the values of bad
-        time-phase bins to appropriate replacement values. All arguments are
-        the output of the time_phase_mask() function.
+        time-phase bins to appropriate replacement values.
         """
         ipol = 0
         repvals = tpm.replacement_values
@@ -80,4 +74,7 @@ class ArchiveWrapper:
         return np.linspace(fch1, fchn, n)
 
     def save(self, path: Union[str, os.PathLike]):
+        """
+        Save archive to given path.
+        """
         self._archive.unload(str(path))
