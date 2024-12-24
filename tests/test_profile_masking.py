@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from numpy.typing import NDArray
 
-from clfd import profile_mask
+from clfd import profile_masking
 from clfd.core import AVAILABLE_FEATURES
 
 
@@ -20,24 +20,24 @@ def test_feature_returns_ndarray_with_expected_shape(data_cube: NDArray, feature
 
 
 def test_profile_masking2(data_cube: NDArray, expected_profmask: NDArray):
-    result = profile_mask(data_cube, features=("std", "ptp", "lfamp"), q=2.0, zap_channels=())
-    assert np.array_equal(result.profile_mask, expected_profmask)
+    result = profile_masking(data_cube, features=("std", "ptp", "lfamp"), q=2.0, zap_channels=())
+    assert np.array_equal(result.mask, expected_profmask)
 
 
 @pytest.mark.parametrize("zap_channels", [[0], [127], [17, 3, 93, 42], range(42, 93)], ids=repr)
 def test_profile_masking2_with_zapped_channels(data_cube: NDArray, zap_channels: Iterable[int]):
-    result = profile_mask(data_cube, q=1.0e9, zap_channels=zap_channels)
+    result = profile_masking(data_cube, q=1.0e9, zap_channels=zap_channels)
     assert set(result.zap_channels) == set(zap_channels)
     assert result.zap_channels == sorted(result.zap_channels)
-    assert np.all(result.profile_mask[:, zap_channels])
+    assert np.all(result.mask[:, zap_channels])
 
 
 def test_profile_masking2_ignores_out_of_range_zap_channels(data_cube: NDArray):
-    result = profile_mask(data_cube, q=1.0e9, zap_channels=range(120, 140))
+    result = profile_masking(data_cube, q=1.0e9, zap_channels=range(120, 140))
 
     expected_zap_chanels = list(range(120, 128))
     assert result.zap_channels == expected_zap_chanels
 
-    is_whole_channel_masked = np.ufunc.reduce(np.logical_and, result.profile_mask, axis=1)
+    is_whole_channel_masked = np.ufunc.reduce(np.logical_and, result.mask, axis=1)
     assert np.all(is_whole_channel_masked[120:128])
     assert np.all(np.logical_not(is_whole_channel_masked[0:120]))

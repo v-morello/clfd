@@ -34,7 +34,7 @@ class Stats:
 
 
 @dataclass(frozen=True)
-class MaskingResult:
+class ProfileMasking:
     """
     TODO
     """
@@ -44,7 +44,7 @@ class MaskingResult:
     zap_channels: tuple[int]
     feature_values: dict[str, NDArray]
     feature_stats: dict[str, Stats]
-    profile_mask: NDArray
+    mask: NDArray
 
 
 def make_feature_values_dict(cube: NDArray, features: Iterable[str]) -> dict[str, NDArray]:
@@ -84,12 +84,12 @@ def make_feature_mask_dict(
     return result
 
 
-def profile_mask(
+def profile_masking(
     cube: NDArray,
     features: Iterable[str] = ("std", "ptp", "lfamp"),
     q: float = 2.0,
     zap_channels: Iterable[int] = (),
-) -> MaskingResult:
+) -> ProfileMasking:
     """
     TODO
     """
@@ -105,13 +105,13 @@ def profile_mask(
     profile_mask = functools.reduce(np.logical_or, feature_masks.values())
     profile_mask[:, zap_channels] = True
 
-    return MaskingResult(
+    return ProfileMasking(
         feature_names=features,
         q=q,
         zap_channels=sorted(zap_channels),
         feature_values=feature_values,
         feature_stats=feature_stats,
-        profile_mask=profile_mask,
+        mask=profile_mask,
     )
 
 

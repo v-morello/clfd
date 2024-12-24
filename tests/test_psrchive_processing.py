@@ -4,7 +4,7 @@ import numpy
 import numpy as np
 import pytest
 
-from clfd import ArchiveWrapper, profile_mask, time_phase_mask
+from clfd import ArchiveWrapper, profile_masking, time_phase_mask
 
 from .utils import HAS_PSRCHIVE
 
@@ -33,13 +33,13 @@ def test_profile_masked_archive_is_saved_with_expected_weights(archive_path: Pat
     wrapper = ArchiveWrapper(archive_path)
     cube = wrapper.data_cube()
 
-    result = profile_mask(cube, features=["std", "ptp", "lfamp"], q=2.0, zap_channels=range(10))
-    wrapper.apply_profile_mask(result.profile_mask)
+    result = profile_masking(cube, features=["std", "ptp", "lfamp"], q=2.0, zap_channels=range(10))
+    wrapper.apply_profile_mask(result.mask)
     output_path = tmp_path / "archive.ar"
     wrapper.save(output_path)
 
     wrapper = ArchiveWrapper(output_path)
-    assert np.array_equal(wrapper._archive.get_weights() == 0.0, result.profile_mask)
+    assert np.array_equal(wrapper._archive.get_weights() == 0.0, result.mask)
 
 
 @pytest.mark.skipif(not HAS_PSRCHIVE, reason="psrchive python bindings must be installed")
