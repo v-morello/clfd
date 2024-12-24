@@ -1,55 +1,35 @@
-import os
-import unittest
+import numpy as np
+from numpy.typing import NDArray
 
-import numpy
-
-import clfd
-import clfd.features
-
-from .utils import get_example_data_path
+from clfd import time_phase_mask
 
 
-def load_test_datacube():
-    fname = os.path.join(get_example_data_path(), "npy_example.npy")
-    return numpy.load(fname)
+def test_time_phase_masking_produces_expected_mask(data_cube: NDArray, expected_tpmask: NDArray):
+    result = time_phase_mask(data_cube, q=2.0, zap_channels=())
+    num_subints, __, num_bins = data_cube.shape
+    assert result.mask.shape == (num_subints, num_bins)
+    assert result.replacement_values.shape == data_cube.shape
+    assert np.array_equal(result.mask, expected_tpmask)
 
 
-class TestTimePhaseMask(unittest.TestCase):
-    def setUp(self):
-        self.cube = load_test_datacube()
+def test_time_phase_masking_produces_expected_valid_channels(data_cube: NDArray):
+    zap_channels = range(10, 42)
+    result = time_phase_mask(data_cube, zap_channels=zap_channels)
 
-    def test_time_phase_mask(self):
-        num_subints, num_chans, num_bins = self.cube.shape
-        q = 2.0
-        zap_channels = range(10)
-        all_channels = range(num_chans)
-
-        result = clfd.time_phase_mask(self.cube, q=q, zap_channels=zap_channels)
-
-        # Check that valid_chans is the complement set of zap_channels
-        isect = set(zap_channels).intersection(set(result.valid_channels))
-        union = set(zap_channels).union(set(result.valid_channels))
-        self.assertFalse(isect)
-        self.assertTrue(union == set(all_channels))
-
-        # Check output shapes
-        self.assertEqual(result.mask.shape, (num_subints, num_bins))
-        self.assertEqual(result.replacement_values.shape, self.cube.shape)
-
-        # Check replacement of values behaves as expected
-        # Once bad values have been replaced, if we call time_phase_mask() again
-        # with the same params, then no previously flagged time-phase bins should be
-        # flagged again.
-        # NOTE: HOWEVER, new bins can still get flagged !
-        # That is because once the old outliers have been replaced by "good" values,
-        # the range of acceptable value is reduced which may push previously "normal" points
-        # into outlier status.
-        clean_data = result.apply(self.cube)
-        new_result = clfd.time_phase_mask(clean_data, q=q, zap_channels=zap_channels)
-
-        # Check that no bin is flagged in both masks
-        self.assertFalse(numpy.any(new_result.mask & result.mask))
+    num_chans = data_cube.shape[1]
+    assert not set(result.valid_channels).intersection(zap_channels)
+    assert set(result.valid_channels).union(set(zap_channels)) == set(range(num_chans))
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_data_replaced_after_time_phase_masking_does_not_get_flagged_again(data_cube: NDArray):
+    """
+    Once bad values have been replaced, if we call time_phase_mask() again
+    **with the same params**, then no previously flagged time-phase bins should
+    be flagged again (NOTE: new time-phase bins may get flagged though)
+    """
+    q = 2.0
+    zap_channels = range(10, 42)
+    result = time_phase_mask(data_cube, q=q, zap_channels=zap_channels)
+    clean_cube = result.apply(data_cube)
+    new_result = time_phase_mask(clean_cube, q=q, zap_channels=zap_channels)
+    assert not np.any(new_result.mask & result.mask)
