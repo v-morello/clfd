@@ -2,6 +2,36 @@
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 1.0.0 - 2024-12-30
+
+First stable release after a complete rewrite. `clfd` is now extensively tested in a CI pipeline.
+
+### Added
+
+- CLI app now saves both a report and an associated PNG plot for each archive processed.
+- Report plots now show all the data in one figure: feature values, profile mask and time-phase spike mask (if spike removal was performed).
+
+### Fixed
+
+- Formula for autocorrelation feature `acf` has been corrected.
+- CLI app now checks whether PSRCHIVE python bindings are installed.
+- CLI app now checks that there are no duplicate input archive names when `--outdir` is specified. Before, there could be name collisions between output files.
+- CLI app now validates feature names.
+
+### Changed
+
+- Minimum required Python version is now 3.9.
+- By default, CLI app now uses as many parallel processes as there are CPU cores.
+- CLI app won't crash if there are archives that cannot be processed. Instead, the name of the offending archive is logged with the error traceback. This choice was made because the app uses multiprocessing.
+- Reports are now in a custom JSON format. They can be read using `Report.load()`.
+- `matplotlib` is now a required dependency.
+- Removed dependencies: `pandas`, `tables`, `scipy`.
+
+### Removed
+
+- CLI app argument `--fmt`. It was pointless considering that the only supported data format is PSRCHIVE.
+- CLI app argument `-e, --ext`. The additional extension given to clean output archives is now always `.clfd`, which used to be the default choice.
+
 ## 0.4.0 - 2024-12-17
 
 This new version fixes an issue caused by a change in PSRCHIVE Python API, and starts a much needed modernisation effort of `clfd`. **We are dropping support for Python 2.x from this point.**
