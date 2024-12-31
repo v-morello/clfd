@@ -2,6 +2,15 @@
 All notable changes will be documented in this file. The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
+## 1.0.1 - 2025-01-01
+
+Slightly improved report plots.
+
+### Changed
+
+- Improved report plot layout; removed frames around each subplot, they had questionable added value and did not always render well at the edges of the image.
+
+
 ## 1.0.0 - 2024-12-30
 
 First stable release after a complete rewrite. `clfd` is now extensively tested in a CI pipeline.

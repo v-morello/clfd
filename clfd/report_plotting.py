@@ -1,79 +1,146 @@
 import itertools
+from collections.abc import Sequence
+from dataclasses import dataclass
+from typing import Iterable
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.gridspec import GridSpec
+from matplotlib.gridspec import GridSpec, SubplotSpec
 from matplotlib.patches import Rectangle
+from matplotlib.pyplot import Axes, Figure
 from numpy.typing import NDArray
 
 from clfd import Report
 from clfd.profile_masking import Stats
 
-BANNER_BACKGROUND_COLOR = "#054a91"
-BANNER_TEXT_COLOR = "w"
-REJECTION_BOUNDARY_COLOR = "#e57a44"
 
+@dataclass
+class PlotRegion:
+    left: float
+    right: float
+    bottom: float
+    top: float
 
-def plot_report(report: Report) -> plt.Figure:
-    """
-    Plot a report, return a figure.
-    """
-    fig = plt.figure(figsize=(20, 10), dpi=80)
+    @property
+    def width(self) -> float:
+        return self.right - self.left
 
-    plot_frame("Feature Values", left=0.0, right=0.5)
-    corner_gridspec_kwargs = {
-        "left": 0.04,
-        "right": 0.49,
-        "top": 0.94,
-        "bottom": 0.05,
-        "hspace": 0.05,
-        "wspace": 0.05,
-    }
-    pm = report.profile_masking_result
-    corner_plot(
-        pm.feature_values, pm.feature_stats, pm.q, **corner_gridspec_kwargs
-    )
+    @property
+    def height(self) -> float:
+        return self.top - self.bottom
 
-    plot_frame("Profile Mask", left=0.5, right=0.75)
-    mask_gridspec_kwargs = {
-        "left": 0.54,
-        "right": 0.73,
-        "top": 0.94,
-        "bottom": 0.05,
-    }
-    mask_plot(pm.mask, "subint", "channel", **mask_gridspec_kwargs)
+    @property
+    def xmid(self) -> float:
+        return (self.left + self.right) / 2
 
-    if report.spike_finding_result:
-        plot_frame("Time-Phase Spikes", left=0.75, right=1.0)
-        mask_gridspec_kwargs = {
-            "left": 0.79,
-            "right": 0.98,
-            "top": 0.94,
-            "bottom": 0.05,
-        }
-        mask_plot(
-            report.spike_finding_result.mask,
-            "subint",
-            "phase bin",
-            **mask_gridspec_kwargs,
+    @property
+    def ymid(self) -> float:
+        return (self.top + self.bottom) / 2
+
+    def scaled(self, xscale: float, yscale: float) -> "PlotRegion":
+        return PlotRegion(
+            left=self.xmid - xscale * self.width / 2,
+            right=self.xmid + xscale * self.width / 2,
+            bottom=self.ymid - yscale * self.height / 2,
+            top=self.ymid + yscale * self.height / 2,
         )
-    return fig
 
 
-def plot_frame(title: str, *, left: float, right: float):
-    gs_frame = GridSpec(1, 1, top=1, bottom=0, left=left, right=right)
-    axes = plt.subplot(gs_frame[0, 0])
+class Frame:
+    """
+    Container for a plot, delimited by a rectangle and with a title box at the
+    top.
+    """
+
+    def __init__(
+        self,
+        title: str,
+        *,
+        left: float,
+        right: float,
+        top: float,
+        bottom: float,
+    ):
+        self.title = title
+        self.gridspec = GridSpec(
+            2,
+            1,
+            left=left,
+            right=right,
+            top=top,
+            bottom=bottom,
+            height_ratios=(1, 24),
+            hspace=0,
+        )
+        title_box_axes = draw_axes_with_outer_frame_only(self.gridspec[0, 0])
+        draw_axes_with_outer_frame_only(self.gridspec[1, 0])
+        draw_title_box_filling_axes(title_box_axes, title)
+
+    def usable_plot_region(self) -> PlotRegion:
+        g = self.gridspec
+        hup, hdown = g.get_height_ratios()
+        usable_height_fraction = hdown / (hdown + hup)
+        return PlotRegion(
+            left=g.left,
+            right=g.right,
+            bottom=g.bottom,
+            top=g.bottom + usable_height_fraction * (g.top - g.bottom),
+        )
+
+
+class FrameRow(Sequence[Frame]):
+    """
+    Row of frames.
+    """
+
+    def __init__(
+        self,
+        titles: Iterable[str],
+        width_ratios: Iterable[float],
+    ):
+        left = 0
+        widths = [r / sum(width_ratios) for r in width_ratios]
+
+        self._frames: list[Frame] = []
+        for title, width in zip(titles, widths):
+            frame = Frame(
+                title, left=left, right=left + width, bottom=0.0, top=1.0
+            )
+            self._frames.append(frame)
+            left += width
+
+    def __getitem__(self, index: int) -> Frame:
+        return self._frames[index]
+
+    def __len__(self):
+        return len(self._frames)
+
+
+def draw_axes_with_outer_frame_only(spec: SubplotSpec) -> plt.Axes:
+    axes = plt.subplot(spec)
     axes.set_facecolor("w")
-    axes.tick_params(axis="both", which="both", left=False, labelleft=False)
+    axes.tick_params(
+        axis="both",
+        which="both",
+        bottom=False,
+        top=False,
+        left=False,
+        right=False,
+        labelleft=False,
+        labelright=False,
+        labeltop=False,
+        labelbottom=False,
+    )
+    axes.set_frame_on(False)
+    return axes
 
-    gs_title = GridSpec(1, 1, top=1, bottom=0.95, left=left, right=right)
-    axes = plt.subplot(gs_title[0, 0])
-    axes.axis("off")
-    axes.set_xlim(0, 1)
-    axes.set_ylim(0, 1)
 
+def draw_title_box_filling_axes(axes: Axes, title: str):
     rectangle = Rectangle(
-        (0, 0), width=1, height=1, facecolor=BANNER_BACKGROUND_COLOR
+        (0, 0),
+        width=1,
+        height=1,
+        facecolor="#054a91",
     )
     axes.add_patch(rectangle)
     axes.text(
@@ -82,10 +149,57 @@ def plot_frame(title: str, *, left: float, right: float):
         title,
         fontsize=16,
         fontweight="bold",
-        color=BANNER_TEXT_COLOR,
+        color="w",
         horizontalalignment="center",
         verticalalignment="center",
     )
+
+
+def plot_report(report: Report) -> Figure:
+    fig = plt.figure(figsize=(20, 10), dpi=80)
+    feature_values_frame, profile_mask_frame, spike_mask_frame = FrameRow(
+        ["Feature Values", "Profile Mask", "Time-Phase Spikes"], [9, 4, 4]
+    )
+
+    pm = report.profile_masking_result
+    region = feature_values_frame.usable_plot_region().scaled(
+        xscale=0.8, yscale=0.9
+    )
+    kwargs = {
+        "left": region.left,
+        "right": region.right,
+        "bottom": region.bottom,
+        "top": region.top,
+        "wspace": 0.04,
+        "hspace": 0.04,
+    }
+    corner_plot(pm.feature_values, pm.feature_stats, pm.q, **kwargs)
+
+    region = profile_mask_frame.usable_plot_region().scaled(
+        xscale=0.8, yscale=0.9
+    )
+    kwargs = {
+        "left": region.left,
+        "right": region.right,
+        "bottom": region.bottom,
+        "top": region.top,
+    }
+    mask_plot(pm.mask, "subint", "channel", **kwargs)
+
+    if report.spike_finding_result is not None:
+        region = spike_mask_frame.usable_plot_region().scaled(
+            xscale=0.8, yscale=0.9
+        )
+        kwargs = {
+            "left": region.left,
+            "right": region.right,
+            "bottom": region.bottom,
+            "top": region.top,
+        }
+        mask_plot(
+            report.spike_finding_result.mask, "subint", "phase bin", **kwargs
+        )
+    return fig
 
 
 def corner_plot(
@@ -100,7 +214,7 @@ def corner_plot(
     rejection_boundaries_kwargs = {
         "linestyles": "--",
         "lw": 1,
-        "color": REJECTION_BOUNDARY_COLOR,
+        "color": "#e57a44",
     }
 
     num_features = len(feature_values)
