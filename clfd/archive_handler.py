@@ -25,9 +25,15 @@ class ArchiveHandler:
     def data_cube(self) -> NDArray:
         """
         Return the archive data as a 3-dimensional numpy array of shape
-        (num_subints, num_chans, num_bins). Only Stokes I data is read.
+        (num_subints, num_chans, num_bins). Only Stokes I data is used.
         """
-        return self._archive.get_data()[:, 0, :, :]
+        data = self._archive.get_data()[:, 0, :, :]
+
+        state = self._archive.get_state();
+        if state == 'Coherence' or state == 'PPQQ':
+            data += self._archive.get_data()[:, 1, :, :]
+
+        return data
 
     def apply_profile_mask(self, mask: NDArray):
         """
