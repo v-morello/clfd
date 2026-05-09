@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Install
         run: |
+          git config --global --add safe.directory '*'
           python -m pip install --upgrade pip
           pip install .[dev]
       - name: Lint
@@ -51,6 +52,7 @@ jobs:
         # NOTE: build creates a .egg-info directory which interferes
         # with the pip install command in next step
         run: |
+          git config --global --add safe.directory '*'
           python -m build
           rm -rf *.egg-info
       - name: Install wheel
